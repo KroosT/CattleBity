@@ -40,6 +40,4 @@ public class Input extends JComponent {
         return map[keyCode];
     }
 
-
-
 }

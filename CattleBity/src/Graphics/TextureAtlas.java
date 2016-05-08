@@ -15,5 +15,4 @@ public class TextureAtlas {
     public BufferedImage Cut(int x, int y, int w, int h) {
         return image.getSubimage(x, y, w, h);
     }
-
 }

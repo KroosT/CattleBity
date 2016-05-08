@@ -19,7 +19,7 @@ public class Game implements Runnable {
     private static final float UPDATE_INTERVAL = Time.SECOND / UPDATE_RATE;
     private static final long IDLE_TIME = 1;
 
-    private static final String ATLAS_FILE_NAME = "texture_atlas.png";
+    private static final String ATLAS_FILE_NAME = "textureAtlas.png";
 
     private boolean running;
     private Thread gameThread;
@@ -28,12 +28,12 @@ public class Game implements Runnable {
     private TextureAtlas atlas;
 
     //temp
-    float x = 350;
-    float y = 250;
-    float x1 = 350;
-    float y1 = 250;
-    float radius = 50;
-    float speed = 3;
+    private float x = 350;
+    private float y = 250;
+    private float x1 = 350;
+    private float y1 = 250;
+    private float radius = 50;
+    private float speed = 3;
     //end
 
     public Game() {
@@ -44,6 +44,7 @@ public class Game implements Runnable {
         input = new Input();
         Display.addInputListener(input);
         atlas = new TextureAtlas(ATLAS_FILE_NAME);
+
     }
 
     public synchronized void start() {

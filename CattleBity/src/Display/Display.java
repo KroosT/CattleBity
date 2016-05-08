@@ -51,9 +51,7 @@ public class Display {
     }
 
     public static void clear() {
-
         Arrays.fill(bufferData, clearColor);
-
     }
 
     public static void swapBuffers() {

@@ -18,7 +18,6 @@ public class ResourceLoader {
             e.printStackTrace();
         }
         return image;
-
     }
 
 }
