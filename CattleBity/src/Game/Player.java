@@ -44,7 +44,6 @@ public class Player extends Entity {
 
     public Player(float x, float y, float scale, float speed, TextureAtlas atlas){
         super(EntityType.Player, x, y);
-        // TODO Auto-generated constructor stub
 
         this.scale = scale;
         this.speed = speed;
