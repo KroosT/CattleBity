@@ -1,19 +1,19 @@
 package Game;
 
 import Display.Display;
+import Game.Level.Level;
 import IO.Input;
 import utils.Time;
 import Graphics.TextureAtlas;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
 
 public class Game implements Runnable {
 
-    private static final int WIDTH = 800;
-    private static final int HEIGHT = 600;
+    public static final int WIDTH = 800;
+    public static final int HEIGHT = 608;
     private static final String TITLE = "CattleBity";
-    private static final int CLEAR_COLOR = 0xff0ff00f;
+    private static final int CLEAR_COLOR = 0xff000000;
     private static final int NUM_BUFFERS = 3;
     private static final float UPDATE_RATE = 60.0f;
     private static final float UPDATE_INTERVAL = Time.SECOND / UPDATE_RATE;
@@ -26,15 +26,9 @@ public class Game implements Runnable {
     private Graphics2D graphics;
     private Input input;
     private TextureAtlas atlas;
+    private Player player;
+    private Level level;
 
-    //temp
-    private float x = 350;
-    private float y = 250;
-    private float x1 = 350;
-    private float y1 = 250;
-    private float radius = 50;
-    private float speed = 3;
-    //end
 
     public Game() {
 
@@ -44,6 +38,8 @@ public class Game implements Runnable {
         input = new Input();
         Display.addInputListener(input);
         atlas = new TextureAtlas(ATLAS_FILE_NAME);
+        player = new Player(300, 300, 2, 3, atlas);
+        level = new Level(atlas);
 
     }
 
@@ -72,57 +68,15 @@ public class Game implements Runnable {
     }
 
     private void update() {
-
-        if (input.getKey(KeyEvent.VK_UP)) {
-            if (y <= 0) {
-                return;
-            } else {
-                y -= speed;
-            }
-        }
-        if (input.getKey(KeyEvent.VK_DOWN)) {
-            if (y + radius * 2 >= HEIGHT) {
-                return;
-            } else {
-                y += speed;
-            }
-        }
-        if (input.getKey(KeyEvent.VK_LEFT)) {
-            if (x <= 0) {
-                return;
-            } else {
-                x -= speed;
-            }
-        }
-        if (input.getKey(KeyEvent.VK_RIGHT)) {
-            if (x + radius * 2 >= WIDTH) {
-                return;
-            } else {
-                x += speed;
-            }
-        }
-        if (input.getKey(KeyEvent.VK_W)) {
-            y1 -= speed;
-        }
-        if (input.getKey(KeyEvent.VK_S)) {
-            y1 += speed;
-        }
-        if (input.getKey(KeyEvent.VK_A)) {
-            x1 -= speed;
-        }
-        if (input.getKey(KeyEvent.VK_D)) {
-            x1 += speed;
-        }
-
+        player.update(input);
+        level.update();
     }
 
     private void render() {
         Display.clear();
-        graphics.setColor(Color.WHITE);
-        graphics.drawImage(atlas.Cut(0, 0, 32, 32), 300, 300, null);
-        //graphics.fillOval((int)x, (int)y, (int)(radius * 2), (int)(radius * 2));
-        //graphics.setColor(Color.BLUE);
-        //graphics.fillOval((int)x1, (int)y1, (int)(radius * 2), (int)(radius * 2));
+        level.render(graphics);
+        player.render(graphics);
+        level.renderGrass(graphics);
         Display.swapBuffers();
     }
 
@@ -173,7 +127,7 @@ public class Game implements Runnable {
                 }
             }
             if (count >= Time.SECOND) {
-                Display.setTitle(TITLE + " | " + " Fps: " + fps + " | " + " Upd: " + upd + " Updl: " + updl);
+                Display.setTitle(TITLE + " | " + " Fps: " + fps + " | " + " Upd: " + upd + " | " + " Updl: " + updl);
                 fps = 0;
                 upd = 0;
                 updl = 0;
