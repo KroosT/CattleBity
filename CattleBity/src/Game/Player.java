@@ -16,6 +16,8 @@ public class Player extends Entity {
 
     public static final int SPRITE_SCALE = 16;
     public static final int SPRITES_PER_HEADING = 1;
+    private Bullet bullet;
+    private boolean shotOccured = false;
 
     private enum Heading {
         NORTH(0 * SPRITE_SCALE, 0 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, 1 * SPRITE_SCALE),
@@ -41,10 +43,12 @@ public class Player extends Entity {
     private Map<Heading, Sprite> spriteMap;
     private float scale;
     private float speed;
+    private TextureAtlas atlas;
 
     public Player(float x, float y, float scale, float speed, TextureAtlas atlas){
         super(EntityType.Player, x, y);
 
+        this.atlas = atlas;
         this.scale = scale;
         this.speed = speed;
         heading = Heading.NORTH;
@@ -73,6 +77,9 @@ public class Player extends Entity {
         } else if (input.getKey(KeyEvent.VK_RIGHT)) {
             newX += speed;
             heading = Heading.EAST;
+        } else if (input.getKey(KeyEvent.VK_SPACE)) {
+            bullet = new Bullet(x, y, 1, 2, atlas);
+            shotOccured = true;
         }
 
         if (newX < 0) {
@@ -85,6 +92,7 @@ public class Player extends Entity {
         } else if (newY >= Game.HEIGHT - SPRITE_SCALE * scale) {
             newY = Game.HEIGHT - SPRITE_SCALE * scale;
         }
+
         //for (Point p : lvl.getTilesCoords()) {
         //
         //}
@@ -96,5 +104,7 @@ public class Player extends Entity {
     @Override
     public void render(Graphics2D g){
         spriteMap.get(heading).render(g, x, y);
+        if (shotOccured)
+            bullet.render(g);
     }
 }
