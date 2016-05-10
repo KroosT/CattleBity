@@ -38,7 +38,7 @@ public class Game implements Runnable {
         input = new Input();
         Display.addInputListener(input);
         atlas = new TextureAtlas(ATLAS_FILE_NAME);
-        player = new Player(300, 300, 2, 3, atlas);
+        player = new Player(300, 300, 2, 2, atlas);
         level = new Level(atlas);
 
     }
@@ -68,7 +68,7 @@ public class Game implements Runnable {
     }
 
     private void update() {
-        player.update(input);
+        player.update(input, level);
         level.update();
     }
 

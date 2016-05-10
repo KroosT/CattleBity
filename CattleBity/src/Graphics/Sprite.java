@@ -22,7 +22,6 @@ public class Sprite {
 
     public void render(Graphics2D g, float x, float y) {
 
-
         g.drawImage(image, (int)x, (int)y, null);
 
     }

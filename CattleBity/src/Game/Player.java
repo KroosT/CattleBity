@@ -1,12 +1,12 @@
 package Game;
 
+import Game.Level.Level;
 import IO.Input;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import Graphics.Sprite;
 import Graphics.TextureAtlas;
@@ -18,10 +18,10 @@ public class Player extends Entity {
     public static final int SPRITES_PER_HEADING = 1;
 
     private enum Heading {
-        NORTH(0 * SPRITE_SCALE, 0 * SPRITE_SCALE, 1 * SPRITE_SCALE, 1 * SPRITE_SCALE),
-        EAST(6 * SPRITE_SCALE, 0 * SPRITE_SCALE, 1 * SPRITE_SCALE, 1 * SPRITE_SCALE),
-        WEST(2 * SPRITE_SCALE, 0 * SPRITE_SCALE, 1 * SPRITE_SCALE, 1 * SPRITE_SCALE),
-        SOUTH(4 * SPRITE_SCALE, 0 * SPRITE_SCALE, 1 * SPRITE_SCALE, 1 * SPRITE_SCALE);
+        NORTH(0 * SPRITE_SCALE, 0 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, 1 * SPRITE_SCALE),
+        EAST(6 * SPRITE_SCALE, 0 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, 1 * SPRITE_SCALE),
+        WEST(2 * SPRITE_SCALE, 0 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, 1 * SPRITE_SCALE),
+        SOUTH(4 * SPRITE_SCALE, 0 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, 1 * SPRITE_SCALE);
 
         private int x, y, w, h;
 
@@ -57,7 +57,7 @@ public class Player extends Entity {
     }
 
     @Override
-    public void update(Input input){
+    public void update(Input input, Level lvl){
         float newX = x;
         float newY = y;
 
@@ -85,6 +85,9 @@ public class Player extends Entity {
         } else if (newY >= Game.HEIGHT - SPRITE_SCALE * scale) {
             newY = Game.HEIGHT - SPRITE_SCALE * scale;
         }
+        //for (Point p : lvl.getTilesCoords()) {
+        //
+        //}
 
         x = newX;
         y = newY;
