@@ -40,7 +40,6 @@ public class Collision {
                 break;
             }
         }
-
         return col;
     }
 }
