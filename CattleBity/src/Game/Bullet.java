@@ -5,10 +5,8 @@ import Graphics.Sprite;
 import Graphics.SpriteSheet;
 import Graphics.TextureAtlas;
 import IO.Input;
-import com.sun.scenario.effect.impl.prism.PrImage;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,14 +14,14 @@ import java.util.Map;
 public class Bullet extends Entity{
 
     private static final int SPRITES_PER_HEADING = 1;
-    private static final int SPRITE_SCALE = 16;
+    private static final int SPRITE_SCALE = 3;
 
     private enum Heading {
 
-        NORTH(20 * SPRITE_SCALE, 6 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE),
-        EAST(23 * SPRITE_SCALE, 6 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE),
-        WEST(21 * SPRITE_SCALE, 6 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE),
-        SOUTH(22 * SPRITE_SCALE, 6 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE);
+        NORTH(108 * SPRITE_SCALE - 1, 34 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE + 1),
+        EAST(115 * SPRITE_SCALE, 34 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE + 2, SPRITES_PER_HEADING * SPRITE_SCALE + 2),
+        WEST(110 * SPRITE_SCALE, 34 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE + 1, SPRITES_PER_HEADING * SPRITE_SCALE + 1),
+        SOUTH(113 * SPRITE_SCALE, 34 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE + 2);
 
         private int x, y, w, h;
 
@@ -41,23 +39,23 @@ public class Bullet extends Entity{
 
     private Heading heading;
     private Map<Heading, Sprite> spriteMap;
-    private float speed;
+    private float speed = 2;
     private float scale;
 
-    public Bullet(float x, float y, float scale, float speed, TextureAtlas atlas) {
+    public Bullet(float x, float y, float scale, int heading, TextureAtlas atlas) {
         super(EntityType.Bullet, x, y);
 
-        heading = Heading.NORTH;
+        this.heading = fromNumberInHeading(heading);
         spriteMap = new HashMap<Heading, Sprite>();
         for (Heading h : Heading.values()) {
-            SpriteSheet sheet = new SpriteSheet(h.texture(atlas), SPRITES_PER_HEADING, SPRITE_SCALE);
+            SpriteSheet sheet = new SpriteSheet(h.texture(atlas), SPRITES_PER_HEADING, 3);
             Sprite sprite = new Sprite(sheet, scale);
             spriteMap.put(h, sprite);
         }
     }
 
     @Override
-    public void update(Input input, Level lvl){
+    public void update(Input input, Collision collision, Player player){
 
     }
 
@@ -66,5 +64,19 @@ public class Bullet extends Entity{
         spriteMap.get(heading).render(g, x, y);
     }
 
+    private Heading fromNumberInHeading(int number) {
+        switch (number) {
+            case 0:
+                 return heading = Heading.NORTH;
+            case 1:
+                return heading = Heading.EAST;
+            case 2:
+                return heading = Heading.WEST;
+            case 3:
+                return heading = Heading.SOUTH;
+            default:
+                return heading = Heading.NORTH;
+        }
+    }
 
 }

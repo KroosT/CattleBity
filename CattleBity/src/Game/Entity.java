@@ -1,6 +1,5 @@
 package Game;
 
-import Game.Level.Level;
 import IO.Input;
 
 import java.awt.*;
@@ -20,7 +19,7 @@ public abstract class Entity {
 
     }
 
-    public abstract void update(Input input, Level lvl);
+    public abstract void update(Input input, Collision collision, Player player);
 
     public abstract void render(Graphics2D g);
 

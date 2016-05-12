@@ -1,6 +1,5 @@
 package Game;
 
-import Game.Level.Level;
 import IO.Input;
 
 import java.awt.*;
@@ -37,6 +36,14 @@ public class Player extends Entity {
         protected BufferedImage texture(TextureAtlas atlas) {
             return atlas.Cut(x, y, w, h);
         }
+
+        protected int getWidth() {
+            return w;
+        }
+
+        protected int getHeight() {
+            return h;
+        }
     }
 
     private Heading heading;
@@ -44,6 +51,7 @@ public class Player extends Entity {
     private float scale;
     private float speed;
     private TextureAtlas atlas;
+    private Heading shotDirection;
 
     public Player(float x, float y, float scale, float speed, TextureAtlas atlas){
         super(EntityType.Player, x, y);
@@ -52,6 +60,7 @@ public class Player extends Entity {
         this.scale = scale;
         this.speed = speed;
         heading = Heading.NORTH;
+        shotDirection = Heading.NORTH;
         spriteMap = new HashMap<Heading, Sprite>();
         for (Heading h : Heading.values()){
             SpriteSheet sheet = new SpriteSheet(h.texture(atlas), SPRITES_PER_HEADING, SPRITE_SCALE);
@@ -61,25 +70,54 @@ public class Player extends Entity {
     }
 
     @Override
-    public void update(Input input, Level lvl){
+    public void update(Input input, Collision collision, Player player){
         float newX = x;
         float newY = y;
 
         if (input.getKey(KeyEvent.VK_UP)) {
             newY -= speed;
             heading = Heading.NORTH;
+            if (collision.MacroCollision(player, 3.2f * speed, 0))
+                newY += speed;
         } else if (input.getKey(KeyEvent.VK_DOWN)) {
             newY += speed;
             heading = Heading.SOUTH;
+            if (collision.MacroCollision(player, speed, 1))
+                newY -= speed;
         } else if (input.getKey(KeyEvent.VK_LEFT)) {
             newX -= speed;
             heading = Heading.WEST;
+            if (collision.MacroCollision(player, 3.2f * speed, 2))
+                newX += speed;
         } else if (input.getKey(KeyEvent.VK_RIGHT)) {
             newX += speed;
             heading = Heading.EAST;
-        } else if (input.getKey(KeyEvent.VK_SPACE)) {
-            bullet = new Bullet(x, y, 1, 2, atlas);
-            shotOccured = true;
+            if (collision.MacroCollision(player, speed, 3))
+                newX -= speed;
+        }
+
+        if (input.getKey(KeyEvent.VK_SPACE)) {
+            if (!shotOccured) {
+                switch (heading) {
+                    case NORTH:
+                        bullet = new Bullet(x + 13, y, 1, 0, atlas);
+                        shotDirection = Heading.NORTH;
+                        break;
+                    case EAST:
+                        bullet = new Bullet(x + SPRITE_SCALE, y + 13, 1, 1, atlas);
+                        shotDirection = Heading.EAST;
+                        break;
+                    case WEST:
+                        bullet = new Bullet(x, y + 13, 1, 2, atlas);
+                        shotDirection = Heading.WEST;
+                        break;
+                    case SOUTH:
+                        bullet = new Bullet(x + 13, y + SPRITE_SCALE, 1, 3, atlas);
+                        shotDirection = Heading.SOUTH;
+                        break;
+                }
+                shotOccured = true;
+            }
         }
 
         if (newX < 0) {
@@ -93,18 +131,52 @@ public class Player extends Entity {
             newY = Game.HEIGHT - SPRITE_SCALE * scale;
         }
 
-        //for (Point p : lvl.getTilesCoords()) {
-        //
-        //}
+        if (shotOccured) {
+            switch (shotDirection) {
+                case NORTH:
+                    if (bullet.y - speed < 0) {
+                        bullet = null;
+                        shotOccured = false;
+                    } else bullet.y -= speed;
+                    break;
+                case EAST:
+                    if (bullet.x + speed > Game.WIDTH) {
+                        bullet = null;
+                        shotOccured = false;
+                    } else bullet.x += speed;
+                    break;
+                case WEST:
+                    if (bullet.x - speed < 0) {
+                        bullet = null;
+                        shotOccured = false;
+                    } else bullet.x -= speed;
+                    break;
+                case SOUTH:
+                    if (bullet.y - speed > Game.HEIGHT) {
+                        bullet = null;
+                        shotOccured = false;
+                    } else bullet.y += speed;
+                    break;
+            }
+        }
 
         x = newX;
         y = newY;
     }
 
     @Override
-    public void render(Graphics2D g){
+    public void render(Graphics2D g) {
         spriteMap.get(heading).render(g, x, y);
-        if (shotOccured)
+        if (shotOccured) {
             bullet.render(g);
+        }
+    }
+
+    public int getWidth() {
+        return heading.getWidth();
+    }
+
+    public int getHeight() {
+        return heading.getHeight();
     }
 }

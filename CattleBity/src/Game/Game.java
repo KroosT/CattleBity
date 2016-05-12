@@ -19,7 +19,7 @@ public class Game implements Runnable {
     private static final float UPDATE_INTERVAL = Time.SECOND / UPDATE_RATE;
     private static final long IDLE_TIME = 1;
 
-    private static final String ATLAS_FILE_NAME = "textureAtlas_pro.png";
+    private static final String ATLAS_FILE_NAME = "textureAtlas_pros.png";
 
     private boolean running;
     private Thread gameThread;
@@ -28,6 +28,8 @@ public class Game implements Runnable {
     private TextureAtlas atlas;
     private Player player;
     private Level level;
+    private Collision collision;
+
 
 
     public Game() {
@@ -40,6 +42,7 @@ public class Game implements Runnable {
         atlas = new TextureAtlas(ATLAS_FILE_NAME);
         player = new Player(300, 300, 2, 2, atlas);
         level = new Level(atlas);
+        collision = new Collision(level.getTilesCoords());
 
     }
 
@@ -64,11 +67,10 @@ public class Game implements Runnable {
             e.printStackTrace();
         }
         cleanup();
-
     }
 
     private void update() {
-        player.update(input, level);
+        player.update(input, collision, player);
         level.update();
     }
 
