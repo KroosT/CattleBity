@@ -54,6 +54,14 @@ public class Level {
         return tilesCoords;
     }
 
+    public void destroyTile(int x, int y) {
+        tileMap[x][y] = 0;
+    }
+
+    public void removeCoords(Point p) {
+        tilesCoords.remove(p);
+    }
+
     public void update() {
 
     }

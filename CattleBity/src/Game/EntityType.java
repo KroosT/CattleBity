@@ -3,6 +3,7 @@ package Game;
 public enum EntityType {
 
     Player,
-    Bullet
+    Bullet,
+    Boom;
 
 }

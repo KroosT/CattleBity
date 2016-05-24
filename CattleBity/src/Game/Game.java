@@ -42,7 +42,7 @@ public class Game implements Runnable {
         atlas = new TextureAtlas(ATLAS_FILE_NAME);
         player = new Player(300, 300, 2, 2, atlas);
         level = new Level(atlas);
-        collision = new Collision(level.getTilesCoords());
+        collision = new Collision(level.getTilesCoords(), level);
 
     }
 

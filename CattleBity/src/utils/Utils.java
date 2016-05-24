@@ -24,7 +24,7 @@ public class Utils {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(new File(filepath)));
             String line = null;
-            List<Integer[]> lvlLines = new ArrayList<Integer[]>();
+            List<Integer[]> lvlLines = new ArrayList<>();
             while ((line = reader.readLine()) != null) {
                 lvlLines.add(str_to_int_arrays(line.split(" ")));
             }

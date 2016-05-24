@@ -3,13 +3,19 @@ package Game;
 import IO.Input;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.List;
+import javax.swing.Timer;
 
 import Graphics.Sprite;
 import Graphics.TextureAtlas;
 import Graphics.SpriteSheet;
+
+import static Game.Player.Heading.*;
 
 public class Player extends Entity {
 
@@ -18,7 +24,7 @@ public class Player extends Entity {
     private Bullet bullet;
     private boolean shotOccured = false;
 
-    private enum Heading {
+    public enum Heading {
         NORTH(0 * SPRITE_SCALE, 0 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, 1 * SPRITE_SCALE),
         EAST(6 * SPRITE_SCALE, 0 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, 1 * SPRITE_SCALE),
         WEST(2 * SPRITE_SCALE, 0 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, 1 * SPRITE_SCALE),
@@ -51,7 +57,17 @@ public class Player extends Entity {
     private float scale;
     private float speed;
     private TextureAtlas atlas;
-    private Heading shotDirection;
+    private Map<Heading, List<Bullet>> bulletMap;
+    private List<Bullet> bulletListNorth;
+    private List<Bullet> bulletListEast;
+    private List<Bullet> bulletListWest;
+    private List<Bullet> bulletListSouth;
+    private boolean interval;
+    private Timer timerInterval;
+    private Timer timerBoomCycle;
+    private Boom boom;
+    private boolean boomState;
+    private boolean timerState;
 
     public Player(float x, float y, float scale, float speed, TextureAtlas atlas){
         super(EntityType.Player, x, y);
@@ -59,14 +75,31 @@ public class Player extends Entity {
         this.atlas = atlas;
         this.scale = scale;
         this.speed = speed;
-        heading = Heading.NORTH;
-        shotDirection = Heading.NORTH;
+        heading = NORTH;
         spriteMap = new HashMap<Heading, Sprite>();
-        for (Heading h : Heading.values()){
+        for (Heading h : Heading.values()) {
             SpriteSheet sheet = new SpriteSheet(h.texture(atlas), SPRITES_PER_HEADING, SPRITE_SCALE);
             Sprite sprite = new Sprite(sheet, scale);
             spriteMap.put(h, sprite);
         }
+        bulletListNorth = new ArrayList<Bullet>();
+        bulletListEast = new ArrayList<Bullet>();
+        bulletListWest = new ArrayList<Bullet>();
+        bulletListSouth = new ArrayList<Bullet>();
+        bulletMap = new HashMap<Heading, List<Bullet>>();
+        interval = true;
+        timerState = false;
+        timerInterval = new Timer(1000, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                interval = true;
+            }
+        });
+        timerBoomCycle = new Timer(500, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                boomState = false;
+                boom = null;
+            }
+        });
     }
 
     @Override
@@ -76,48 +109,55 @@ public class Player extends Entity {
 
         if (input.getKey(KeyEvent.VK_UP)) {
             newY -= speed;
-            heading = Heading.NORTH;
-            if (collision.MacroCollision(player, 3.2f * speed, 0))
+            heading = NORTH;
+            if (collision.TankCollision(player, 3.2f * speed, 0))
                 newY += speed;
         } else if (input.getKey(KeyEvent.VK_DOWN)) {
             newY += speed;
-            heading = Heading.SOUTH;
-            if (collision.MacroCollision(player, speed, 1))
+            heading = SOUTH;
+            if (collision.TankCollision(player, speed, 1))
                 newY -= speed;
         } else if (input.getKey(KeyEvent.VK_LEFT)) {
             newX -= speed;
-            heading = Heading.WEST;
-            if (collision.MacroCollision(player, 3.2f * speed, 2))
+            heading = WEST;
+            if (collision.TankCollision(player, 3.2f * speed, 2))
                 newX += speed;
         } else if (input.getKey(KeyEvent.VK_RIGHT)) {
             newX += speed;
-            heading = Heading.EAST;
-            if (collision.MacroCollision(player, speed, 3))
+            heading = EAST;
+            if (collision.TankCollision(player, speed, 3))
                 newX -= speed;
         }
 
         if (input.getKey(KeyEvent.VK_SPACE)) {
-            if (!shotOccured) {
+            if (interval) {
+                timerInterval.restart();
                 switch (heading) {
                     case NORTH:
-                        bullet = new Bullet(x + 13, y, 1, 0, atlas);
-                        shotDirection = Heading.NORTH;
+                        Bullet bulNorth = new Bullet(x + 13, y, 1, 0, atlas);
+                        bulletListNorth.add(bulNorth);
+                        bulletMap.put(heading, bulletListNorth);
                         break;
                     case EAST:
-                        bullet = new Bullet(x + SPRITE_SCALE, y + 13, 1, 1, atlas);
-                        shotDirection = Heading.EAST;
+                        Bullet bulEast = new Bullet(x + SPRITE_SCALE, y + 13, 1, 1, atlas);
+                        bulletListEast.add(bulEast);
+                        bulletMap.put(heading, bulletListEast);
                         break;
                     case WEST:
-                        bullet = new Bullet(x, y + 13, 1, 2, atlas);
-                        shotDirection = Heading.WEST;
+                        Bullet bulWest = new Bullet(x, y + 13, 1, 2, atlas);
+                        bulletListWest.add(bulWest);
+                        bulletMap.put(heading, bulletListWest);
                         break;
                     case SOUTH:
-                        bullet = new Bullet(x + 13, y + SPRITE_SCALE, 1, 3, atlas);
-                        shotDirection = Heading.SOUTH;
+                        Bullet bulSouth = new Bullet(x + 13, y + SPRITE_SCALE, 1, 3, atlas);
+                        bulletListSouth.add(bulSouth);
+                        bulletMap.put(heading, bulletListSouth);
                         break;
                 }
                 shotOccured = true;
+                interval = false;
             }
+
         }
 
         if (newX < 0) {
@@ -132,44 +172,92 @@ public class Player extends Entity {
         }
 
         if (shotOccured) {
-            switch (shotDirection) {
-                case NORTH:
-                    if (bullet.y - speed < 0) {
-                        bullet = null;
-                        shotOccured = false;
-                    } else bullet.y -= speed;
-                    break;
-                case EAST:
-                    if (bullet.x + speed > Game.WIDTH) {
-                        bullet = null;
-                        shotOccured = false;
-                    } else bullet.x += speed;
-                    break;
-                case WEST:
-                    if (bullet.x - speed < 0) {
-                        bullet = null;
-                        shotOccured = false;
-                    } else bullet.x -= speed;
-                    break;
-                case SOUTH:
-                    if (bullet.y - speed > Game.HEIGHT) {
-                        bullet = null;
-                        shotOccured = false;
-                    } else bullet.y += speed;
-                    break;
+            Iterator it = bulletMap.entrySet().iterator();
+            while (it.hasNext()) {
+                HashMap.Entry pair = (HashMap.Entry) it.next();
+                if (pair.getKey() == Heading.values()[0]) {
+                    List list = (List)(pair.getValue());
+                    for (Iterator iter = list.iterator(); iter.hasNext(); ) {
+                        Bullet b = (Bullet) iter.next();
+                        if (b.y - speed < 0) {
+                            iter.remove();
+                        } else b.y -= speed;
+                        if (collision.BulletCollision(b, 3.2f * speed, 0)) {
+                            iter.remove();
+                            interval = true;
+                            boom = new Boom(b.x, b.y, atlas);
+                            boom.setDelay(100);
+                            boomState = true;
+                        }
+                    }
+                } else if (pair.getKey() == Heading.values()[1]) {
+                    List list = (List)(pair.getValue());
+                    for (Iterator iter = list.iterator(); iter.hasNext(); ) {
+                        Bullet b = (Bullet) iter.next();
+                        if (b.x + speed > Game.WIDTH) {
+                            iter.remove();
+                        } else b.x += speed;
+                        if (collision.BulletCollision(b, speed, 3)) {
+                            iter.remove();
+                            interval = true;
+                        }
+                    }
+                } else if (pair.getKey() == Heading.values()[2]) {
+                    List list = (List)(pair.getValue());
+                    for (Iterator iter = list.iterator(); iter.hasNext(); ) {
+                        Bullet b = (Bullet) iter.next();
+                        if (b.x - speed < 0) {
+                            iter.remove();
+                        } else b.x -= speed;
+                        if (collision.BulletCollision(b, 3.2f * speed, 2)) {
+                            iter.remove();
+                            interval = true;
+                        }
+                    }
+                } else if (pair.getKey() == Heading.values()[3]) {
+                    List list = (List)(pair.getValue());
+                    for (Iterator iter = list.iterator(); iter.hasNext(); ) {
+                        Bullet b = (Bullet) iter.next();
+                        if (b.y - speed > Game.HEIGHT) {
+                            iter.remove();
+                        } else b.y += speed;
+                        if (collision.BulletCollision(b, speed, 1)) {
+                            iter.remove();
+                            interval = true;
+                        }
+                    }
+                }
+
             }
+            if (bulletListNorth.isEmpty() && bulletListWest.isEmpty() && bulletListEast.isEmpty() && bulletListSouth.isEmpty())
+                shotOccured = false;
         }
 
         x = newX;
         y = newY;
+        if (boomState) {
+            boom.update();
+            if (!timerState) {
+                timerBoomCycle.restart();
+                timerState = true;
+            }
+        }
     }
 
     @Override
     public void render(Graphics2D g) {
         spriteMap.get(heading).render(g, x, y);
         if (shotOccured) {
-            bullet.render(g);
+            Iterator it = bulletMap.entrySet().iterator();
+            while (it.hasNext()) {
+                HashMap.Entry pair = (HashMap.Entry) it.next();
+                List list = (List)(pair.getValue());
+                for (Object b : list)
+                    ((Bullet) (b)).render(g);
+            }
         }
+        if (boomState)
+            g.drawImage(boom.getImage(), (int)(boom.x - 12), (int)(boom.y - 20), null);
     }
 
     public int getWidth() {

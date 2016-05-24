@@ -1,8 +1,7 @@
 package Game;
 
-import Game.Level.Level;
-import Graphics.Sprite;
-import Graphics.SpriteSheet;
+import Graphics.Sprite2;
+import Graphics.SpriteSheet2;
 import Graphics.TextureAtlas;
 import IO.Input;
 
@@ -38,7 +37,7 @@ public class Bullet extends Entity{
     }
 
     private Heading heading;
-    private Map<Heading, Sprite> spriteMap;
+    private Map<Heading, Sprite2> spriteMap;
     private float speed = 2;
     private float scale;
 
@@ -46,10 +45,10 @@ public class Bullet extends Entity{
         super(EntityType.Bullet, x, y);
 
         this.heading = fromNumberInHeading(heading);
-        spriteMap = new HashMap<Heading, Sprite>();
+        spriteMap = new HashMap<Heading, Sprite2>();
         for (Heading h : Heading.values()) {
-            SpriteSheet sheet = new SpriteSheet(h.texture(atlas), SPRITES_PER_HEADING, 3);
-            Sprite sprite = new Sprite(sheet, scale);
+            SpriteSheet2 sheet = new SpriteSheet2(h.texture(atlas));
+            Sprite2 sprite = new Sprite2(sheet, scale);
             spriteMap.put(h, sprite);
         }
     }
