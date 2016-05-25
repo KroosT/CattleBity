@@ -12,15 +12,12 @@ import java.util.Map;
 
 public class Bullet extends Entity{
 
-    private static final int SPRITES_PER_HEADING = 1;
-    private static final int SPRITE_SCALE = 3;
-
     private enum Heading {
 
-        NORTH(108 * SPRITE_SCALE - 1, 34 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE + 1),
-        EAST(115 * SPRITE_SCALE, 34 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE + 2, SPRITES_PER_HEADING * SPRITE_SCALE + 2),
-        WEST(110 * SPRITE_SCALE, 34 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE + 1, SPRITES_PER_HEADING * SPRITE_SCALE + 1),
-        SOUTH(113 * SPRITE_SCALE, 34 * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE, SPRITES_PER_HEADING * SPRITE_SCALE + 2);
+        NORTH(323, 102, 4, 5),
+        EAST(346, 102, 4, 4),
+        WEST(330, 102, 4, 4),
+        SOUTH(339, 102, 4, 4);
 
         private int x, y, w, h;
 
@@ -38,8 +35,6 @@ public class Bullet extends Entity{
 
     private Heading heading;
     private Map<Heading, Sprite2> spriteMap;
-    private float speed = 2;
-    private float scale;
 
     public Bullet(float x, float y, float scale, int heading, TextureAtlas atlas) {
         super(EntityType.Bullet, x, y);

@@ -33,8 +33,8 @@ public class Boom extends Entity {
     }
 
     private TextureAtlas atlas;
-    private Frames[] bigboom = {FIRST, SECOND, THIRD, FOURTH, FIFTH, FOURTH, THIRD, SECOND, FIRST};
-    private Frames[] smallboom = {FIRST, SECOND, FIRST};
+    private Frames[] bigboom = {FIRST, SECOND, THIRD, FOURTH, FIFTH, FOURTH, THIRD, SECOND, FIRST, FIRST};
+    private Frames[] smallboom = {FIRST, SECOND, FIRST, FIRST};
     private long startTime;
     private long delay;
     private int currentFrame;
@@ -50,18 +50,34 @@ public class Boom extends Entity {
         delay = d;
     }
 
-    public void update() {
+    public int update(int boomKind) {
         long elapsed = (System.nanoTime() - startTime) / 1000000;
         if (elapsed >= delay) {
             currentFrame++;
             startTime = System.nanoTime();
         }
-        if (currentFrame == smallboom.length)
-            currentFrame = 0;
+        switch (boomKind) {
+            case 0:
+                if (currentFrame == smallboom.length)
+                    currentFrame = 0;
+                break;
+            case 6:
+                if (currentFrame == bigboom.length)
+                    currentFrame = 0;
+                break;
+        }
+        return currentFrame;
     }
 
-    public BufferedImage getImage() {
-        return Utils.resize(smallboom[currentFrame].texture(atlas), smallboom[currentFrame].w * 2, smallboom[currentFrame].h * 2);
+    public BufferedImage getImage(int boomKind) {
+        switch (boomKind) {
+            case 0:
+                return Utils.resize(smallboom[currentFrame].texture(atlas), smallboom[currentFrame].w * 2, smallboom[currentFrame].h * 2);
+            case 6:
+                return Utils.resize(bigboom[currentFrame].texture(atlas), bigboom[currentFrame].w * 2, bigboom[currentFrame].h * 2);
+            default:
+                return Utils.resize(smallboom[currentFrame].texture(atlas), smallboom[currentFrame].w * 2, smallboom[currentFrame].h * 2);
+        }
     }
 
     @Override

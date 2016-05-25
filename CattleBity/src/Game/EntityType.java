@@ -4,6 +4,8 @@ public enum EntityType {
 
     Player,
     Bullet,
-    Boom;
+    Boom,
+    EnemyTank,
+    Menu
 
 }

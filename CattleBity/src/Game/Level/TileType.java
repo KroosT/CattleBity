@@ -7,7 +7,8 @@ public enum TileType {
     WATER(2),
     ICE(3),
     GRASS(4),
-    METAL(5);
+    METAL(5),
+    EAGLE(6);
 
 
     private int n;
@@ -32,6 +33,8 @@ public enum TileType {
                 return GRASS;
             case 5:
                 return METAL;
+            case 6:
+                return EAGLE;
             default:
                 return EMPTY;
         }

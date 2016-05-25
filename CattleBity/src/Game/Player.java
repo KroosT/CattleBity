@@ -21,7 +21,6 @@ public class Player extends Entity {
 
     public static final int SPRITE_SCALE = 16;
     public static final int SPRITES_PER_HEADING = 1;
-    private Bullet bullet;
     private boolean shotOccured = false;
 
     public enum Heading {
@@ -63,11 +62,13 @@ public class Player extends Entity {
     private List<Bullet> bulletListWest;
     private List<Bullet> bulletListSouth;
     private boolean interval;
+    private boolean intervalAfterBoom;
     private Timer timerInterval;
-    private Timer timerBoomCycle;
+    private Timer timerIntervalAfterBoom;
     private Boom boom;
     private boolean boomState;
-    private boolean timerState;
+    private int currFrame;
+    private int boomKind;
 
     public Player(float x, float y, float scale, float speed, TextureAtlas atlas){
         super(EntityType.Player, x, y);
@@ -75,7 +76,7 @@ public class Player extends Entity {
         this.atlas = atlas;
         this.scale = scale;
         this.speed = speed;
-        heading = NORTH;
+        heading = EAST;
         spriteMap = new HashMap<Heading, Sprite>();
         for (Heading h : Heading.values()) {
             SpriteSheet sheet = new SpriteSheet(h.texture(atlas), SPRITES_PER_HEADING, SPRITE_SCALE);
@@ -88,16 +89,17 @@ public class Player extends Entity {
         bulletListSouth = new ArrayList<Bullet>();
         bulletMap = new HashMap<Heading, List<Bullet>>();
         interval = true;
-        timerState = false;
-        timerInterval = new Timer(1000, new ActionListener() {
+        intervalAfterBoom = true;
+        timerInterval = new Timer(700, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 interval = true;
+                timerInterval.stop();
             }
         });
-        timerBoomCycle = new Timer(500, new ActionListener() {
+        timerIntervalAfterBoom = new Timer(200, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                boomState = false;
-                boom = null;
+                intervalAfterBoom = true;
+                timerIntervalAfterBoom.stop();
             }
         });
     }
@@ -110,46 +112,46 @@ public class Player extends Entity {
         if (input.getKey(KeyEvent.VK_UP)) {
             newY -= speed;
             heading = NORTH;
-            if (collision.TankCollision(player, 3.2f * speed, 0))
+            if (collision.TankCollision(player, 3.2f * speed, 0) || collision.EnemyTankPlayerTankCollision(player, speed, 0))
                 newY += speed;
         } else if (input.getKey(KeyEvent.VK_DOWN)) {
             newY += speed;
             heading = SOUTH;
-            if (collision.TankCollision(player, speed, 1))
+            if (collision.TankCollision(player, speed, 1) || collision.EnemyTankPlayerTankCollision(player, speed, 1))
                 newY -= speed;
         } else if (input.getKey(KeyEvent.VK_LEFT)) {
             newX -= speed;
             heading = WEST;
-            if (collision.TankCollision(player, 3.2f * speed, 2))
+            if (collision.TankCollision(player, 3.2f * speed, 2) || collision.EnemyTankPlayerTankCollision(player, speed, 2))
                 newX += speed;
         } else if (input.getKey(KeyEvent.VK_RIGHT)) {
             newX += speed;
             heading = EAST;
-            if (collision.TankCollision(player, speed, 3))
+            if (collision.TankCollision(player, speed, 3) || collision.EnemyTankPlayerTankCollision(player, speed, 3))
                 newX -= speed;
         }
 
         if (input.getKey(KeyEvent.VK_SPACE)) {
-            if (interval) {
-                timerInterval.restart();
+            if (interval && intervalAfterBoom) {
+                timerInterval.start();
                 switch (heading) {
                     case NORTH:
-                        Bullet bulNorth = new Bullet(x + 13, y, 1, 0, atlas);
+                        Bullet bulNorth = new Bullet(x + 12, y, 2, 0, atlas);
                         bulletListNorth.add(bulNorth);
                         bulletMap.put(heading, bulletListNorth);
                         break;
                     case EAST:
-                        Bullet bulEast = new Bullet(x + SPRITE_SCALE, y + 13, 1, 1, atlas);
+                        Bullet bulEast = new Bullet(x + SPRITE_SCALE + 10, y + 12, 2, 1, atlas);
                         bulletListEast.add(bulEast);
                         bulletMap.put(heading, bulletListEast);
                         break;
                     case WEST:
-                        Bullet bulWest = new Bullet(x, y + 13, 1, 2, atlas);
+                        Bullet bulWest = new Bullet(x, y + 12, 2, 2, atlas);
                         bulletListWest.add(bulWest);
                         bulletMap.put(heading, bulletListWest);
                         break;
                     case SOUTH:
-                        Bullet bulSouth = new Bullet(x + 13, y + SPRITE_SCALE, 1, 3, atlas);
+                        Bullet bulSouth = new Bullet(x + 12, y + SPRITE_SCALE + 10, 2, 3, atlas);
                         bulletListSouth.add(bulSouth);
                         bulletMap.put(heading, bulletListSouth);
                         break;
@@ -181,13 +183,26 @@ public class Player extends Entity {
                         Bullet b = (Bullet) iter.next();
                         if (b.y - speed < 0) {
                             iter.remove();
-                        } else b.y -= speed;
-                        if (collision.BulletCollision(b, 3.2f * speed, 0)) {
-                            iter.remove();
-                            interval = true;
+                            timerIntervalAfterBoom.start();
                             boom = new Boom(b.x, b.y, atlas);
                             boom.setDelay(100);
                             boomState = true;
+                            boomKind = 0;
+                        } else b.y -= speed;
+                        if (collision.BulletCollision(b, 3.2f * speed, 0)) {
+                            iter.remove();
+                            timerIntervalAfterBoom.start();
+                            boom = new Boom(b.x, b.y, atlas);
+                            boom.setDelay(100);
+                            boomState = true;
+                            boomKind = 0;
+                        } else if (collision.EnemyTankBulletCollision(b, 3.2f * speed, 0)) {
+                            iter.remove();
+                            timerIntervalAfterBoom.start();
+                            boom = new Boom(b.x, b.y, atlas);
+                            boom.setDelay(100);
+                            boomState = true;
+                            boomKind = 6;
                         }
                     }
                 } else if (pair.getKey() == Heading.values()[1]) {
@@ -196,10 +211,17 @@ public class Player extends Entity {
                         Bullet b = (Bullet) iter.next();
                         if (b.x + speed > Game.WIDTH) {
                             iter.remove();
+                            timerIntervalAfterBoom.start();
+                            boom = new Boom(b.x, b.y, atlas);
+                            boom.setDelay(100);
+                            boomState = true;
                         } else b.x += speed;
                         if (collision.BulletCollision(b, speed, 3)) {
                             iter.remove();
-                            interval = true;
+                            timerIntervalAfterBoom.start();
+                            boom = new Boom(b.x, b.y + 10, atlas);
+                            boom.setDelay(100);
+                            boomState = true;
                         }
                     }
                 } else if (pair.getKey() == Heading.values()[2]) {
@@ -208,10 +230,17 @@ public class Player extends Entity {
                         Bullet b = (Bullet) iter.next();
                         if (b.x - speed < 0) {
                             iter.remove();
+                            timerIntervalAfterBoom.start();
+                            boom = new Boom(b.x, b.y, atlas);
+                            boom.setDelay(100);
+                            boomState = true;
                         } else b.x -= speed;
                         if (collision.BulletCollision(b, 3.2f * speed, 2)) {
                             iter.remove();
-                            interval = true;
+                            timerIntervalAfterBoom.start();
+                            boom = new Boom(b.x - 10, b.y + 10, atlas);
+                            boom.setDelay(100);
+                            boomState = true;
                         }
                     }
                 } else if (pair.getKey() == Heading.values()[3]) {
@@ -220,10 +249,17 @@ public class Player extends Entity {
                         Bullet b = (Bullet) iter.next();
                         if (b.y - speed > Game.HEIGHT) {
                             iter.remove();
+                            timerIntervalAfterBoom.start();
+                            boom = new Boom(b.x, b.y, atlas);
+                            boom.setDelay(100);
+                            boomState = true;
                         } else b.y += speed;
                         if (collision.BulletCollision(b, speed, 1)) {
                             iter.remove();
-                            interval = true;
+                            timerIntervalAfterBoom.start();
+                            boom = new Boom(b.x, b.y + 25, atlas);
+                            boom.setDelay(100);
+                            boomState = true;
                         }
                     }
                 }
@@ -236,10 +272,10 @@ public class Player extends Entity {
         x = newX;
         y = newY;
         if (boomState) {
-            boom.update();
-            if (!timerState) {
-                timerBoomCycle.restart();
-                timerState = true;
+            currFrame = boom.update(boomKind);
+            if (currFrame == boomKind + 3) {
+                boom = null;
+                boomState = false;
             }
         }
     }
@@ -256,15 +292,34 @@ public class Player extends Entity {
                     ((Bullet) (b)).render(g);
             }
         }
-        if (boomState)
-            g.drawImage(boom.getImage(), (int)(boom.x - 12), (int)(boom.y - 20), null);
+        if (boomState) {
+            try {
+                g.drawImage(boom.getImage(boomKind), (int) (boom.x - 12 - boomKind * 2), (int) (boom.y - 20 - boomKind * 2), null);
+            } catch (NullPointerException e) {
+                boomState = false;
+            }
+        }
     }
 
-    public int getWidth() {
-        return heading.getWidth();
+    public void setSpeed(int speed) {
+        this.speed = speed;
     }
 
-    public int getHeight() {
-        return heading.getHeight();
+    public void setHeading(int heading) {
+        switch (heading) {
+            case 0:
+                this.heading = NORTH;
+                break;
+            case 1:
+                this.heading = EAST;
+                break;
+            case 2:
+                this.heading = WEST;
+                break;
+            case 3:
+                this.heading = SOUTH;
+                break;
+        }
     }
+
 }

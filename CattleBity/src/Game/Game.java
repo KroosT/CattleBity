@@ -1,12 +1,17 @@
 package Game;
 
 import Display.Display;
+import Game.Enemy.EnemyStrategy;
+import Game.Enemy.EnemyTank;
 import Game.Level.Level;
+import Game.Menu.Menu;
 import IO.Input;
 import utils.Time;
 import Graphics.TextureAtlas;
 
 import java.awt.*;
+import java.util.*;
+import java.util.List;
 
 public class Game implements Runnable {
 
@@ -20,16 +25,20 @@ public class Game implements Runnable {
     private static final long IDLE_TIME = 1;
 
     private static final String ATLAS_FILE_NAME = "textureAtlas_pros.png";
+    private static final String MENU_FILE_NAME = "menu.png";
 
     private boolean running;
     private Thread gameThread;
     private Graphics2D graphics;
     private Input input;
     private TextureAtlas atlas;
+    private Menu menu;
     private Player player;
     private Level level;
     private Collision collision;
-
+    private static int menuChoice;
+    private static boolean choiced;
+    private EnemyStrategy enemyStrategy;
 
 
     public Game() {
@@ -40,9 +49,13 @@ public class Game implements Runnable {
         input = new Input();
         Display.addInputListener(input);
         atlas = new TextureAtlas(ATLAS_FILE_NAME);
-        player = new Player(300, 300, 2, 2, atlas);
+        menu = new Menu(MENU_FILE_NAME);
+        player = new Player(230, 323, 2, 2, atlas);
         level = new Level(atlas);
-        collision = new Collision(level.getTilesCoords(), level);
+        enemyStrategy = new EnemyStrategy(atlas);
+        collision = new Collision(level.getTilesCoords(), level, enemyStrategy);
+        enemyStrategy.addEnemyTank(60, 60);
+        choiced = false;
 
     }
 
@@ -70,15 +83,36 @@ public class Game implements Runnable {
     }
 
     private void update() {
-        player.update(input, collision, player);
-        level.update();
+        if (!choiced){
+            menu.update(input, collision, player);
+        }
+        else {
+            if (menuChoice == 0) {
+                player.update(input, collision, player);
+                level.update();
+            } else if (menuChoice == 1) {
+
+            }
+        }
     }
 
     private void render() {
         Display.clear();
-        level.render(graphics);
-        player.render(graphics);
-        level.renderGrass(graphics);
+        if (!choiced) {
+            menu.render(graphics);
+            player.render(graphics);
+        }
+        else {
+            if (menuChoice == 0) {
+                level.render(graphics);
+                player.render(graphics);
+                enemyStrategy.render(graphics);
+                level.renderGrass(graphics);
+            } else if (menuChoice == 1) {
+
+            }
+        }
+
         Display.swapBuffers();
     }
 
@@ -136,6 +170,13 @@ public class Game implements Runnable {
                 count = 0;
             }
         }
+    }
 
+    public static void setChoiced(boolean choice) {
+        choiced = choice;
+    }
+
+    public static void setMenuChoice(int choice) {
+        menuChoice = choice;
     }
 }
