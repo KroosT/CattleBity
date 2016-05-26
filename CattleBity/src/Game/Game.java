@@ -52,8 +52,9 @@ public class Game implements Runnable {
         menu = new Menu(MENU_FILE_NAME);
         player = new Player(230, 323, 2, 2, atlas);
         level = new Level(atlas);
-        enemyStrategy = new EnemyStrategy(atlas);
-        collision = new Collision(level.getTilesCoords(), level, enemyStrategy);
+        collision = new Collision(level.getTilesCoords(), level);
+        enemyStrategy = new EnemyStrategy(atlas, collision);
+        collision.setEnemyStrategy(enemyStrategy);
         enemyStrategy.addEnemyTank(60, 60);
         choiced = false;
 
@@ -89,6 +90,7 @@ public class Game implements Runnable {
         else {
             if (menuChoice == 0) {
                 player.update(input, collision, player);
+                enemyStrategy.update();
                 level.update();
             } else if (menuChoice == 1) {
 

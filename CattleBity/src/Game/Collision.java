@@ -16,13 +16,14 @@ public class Collision {
     private List<Point> iceCoords;
     private List<Point> emptyCoords;
     private List<EnemyTank> enemyTankList;
-    private Point eagleCoords;
+    private List<Point> infoCoords;
+    private List<Point> eagleCoords;
     private Level lvl;
     private boolean iceCol;
     private EnemyStrategy enemyStrategy;
     private List<Point> metalCoords;
 
-    public Collision(List<Point> coords, Level lvl, EnemyStrategy enemyStrategy) {
+    public Collision(List<Point> coords, Level lvl) {
         this.coords = coords;
         this.enemyStrategy = enemyStrategy;
         this.eagleCoords = lvl.getEagleCoords();
@@ -30,7 +31,7 @@ public class Collision {
         this.iceCoords = lvl.getIceCoords();
         this.emptyCoords = lvl.getEmptyCoords();
         this.metalCoords = lvl.getMetalCoords();
-        this.enemyTankList = enemyStrategy.getEnemyTankList();
+        infoCoords = lvl.getInfoCoords();
         this.lvl = lvl;
         this.iceCol = false;
     }
@@ -78,6 +79,13 @@ public class Collision {
                 break;
             }
         }
+        for (Point p : infoCoords) {
+            Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+            if (playerRect.intersects(pRect)){
+                col = true;
+                break;
+            }
+        }
         for (Point p : iceCoords) {
             Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
             if (playerRect.intersects(pRect)){
@@ -96,9 +104,11 @@ public class Collision {
                 }
             }
         }
-        Rectangle eagleRect = new Rectangle(eagleCoords.x, eagleCoords.y, 42, 42);
-        if (playerRect.intersects(eagleRect))
-            col = true;
+        for (Point p : eagleCoords) {
+            Rectangle eagleRect = new Rectangle(p.x, p.y, 42, 42);
+            if (playerRect.intersects(eagleRect))
+                col = true;
+        }
         return col;
     }
 
@@ -132,14 +142,30 @@ public class Collision {
                 lvl.removeCoords(p);
                 break;
             }
-            Rectangle eagleRect = new Rectangle(eagleCoords.x, eagleCoords.y, 42, 42);
+//            Rectangle eagleRect = new Rectangle(eagleCoords.x, eagleCoords.y, 42, 42);
+//            if (bulletRect.intersects(eagleRect)) {
+//                col = true;
+//                lvl.destroyTile(eagleCoords.y / TILE_SCALE, eagleCoords.x / TILE_SCALE);
+//                lvl.removeEagleCoords();
+//            }
+        }
+        for (Point p : eagleCoords) {
+            Rectangle eagleRect = new Rectangle(p.x, p.y, 42, 42);
             if (bulletRect.intersects(eagleRect)) {
                 col = true;
-                lvl.destroyTile(eagleCoords.y / TILE_SCALE, eagleCoords.x / TILE_SCALE);
-                lvl.removeEagleCoords();
+                lvl.destroyTile(p.y / TILE_SCALE, p.x / TILE_SCALE);
+                lvl.removeEagleCoords(p);
+                break;
             }
         }
         for (Point p : metalCoords) {
+            Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+            if (bulletRect.intersects(pRect)){
+                col = true;
+                break;
+            }
+        }
+        for (Point p : infoCoords) {
             Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
             if (bulletRect.intersects(pRect)){
                 col = true;
@@ -211,5 +237,85 @@ public class Collision {
         }
 
         return col;
+    }
+
+    public boolean EnemyTankCollision(EnemyTank enemyTank, float speed, int direction) {
+        this.enemyTankList = enemyStrategy.getEnemyTankList();
+        boolean col = false;
+        Rectangle enemyTankRect;
+        switch (direction) {
+            case 0:
+                enemyTankRect = new Rectangle((int)enemyTank.x, (int)(enemyTank.y - 4 * speed), 30, 30);
+                break;
+            case 1:
+                enemyTankRect = new Rectangle((int)enemyTank.x, (int)(enemyTank.y + speed), 30, 30);
+                break;
+            case 2:
+                enemyTankRect = new Rectangle((int)(enemyTank.x - speed), (int)enemyTank.y, 30, 30);
+                break;
+            case 3:
+                enemyTankRect = new Rectangle((int)(enemyTank.x + speed), (int)enemyTank.y, 30, 30);
+                break;
+            default:
+                enemyTankRect = new Rectangle((int)enemyTank.x, (int)enemyTank.y, 30, 30);
+                break;
+        }
+
+        for (Point p : coords) {
+            Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+            if (enemyTankRect.intersects(pRect)){
+                col = true;
+                break;
+            }
+        }
+        for (Point p : waterCoords) {
+            Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+            if (enemyTankRect.intersects(pRect)){
+                col = true;
+                break;
+            }
+        }
+        for (Point p : metalCoords) {
+            Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+            if (enemyTankRect.intersects(pRect)){
+                col = true;
+                break;
+            }
+        }
+        for (Point p : infoCoords) {
+            Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+            if (enemyTankRect.intersects(pRect)){
+                col = true;
+                break;
+            }
+        }
+        for (Point p : iceCoords) {
+            Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+            if (enemyTankRect.intersects(pRect)){
+                enemyTank.setSpeed(4);
+                iceCol = true;
+                break;
+            }
+        }
+        if (iceCol) {
+            for (Point p : emptyCoords) {
+                Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+                if (enemyTankRect.intersects(pRect)) {
+                    enemyTank.setSpeed(2);
+                    iceCol = false;
+                    break;
+                }
+            }
+        }
+        for (Point p : eagleCoords) {
+            Rectangle eagleRect = new Rectangle(p.x, p.y, 42, 42);
+            if (enemyTankRect.intersects(eagleRect))
+                col = true;
+        }
+        return col;
+    }
+
+    public void setEnemyStrategy(EnemyStrategy enemyStrategy) {
+        this.enemyStrategy = enemyStrategy;
     }
 }

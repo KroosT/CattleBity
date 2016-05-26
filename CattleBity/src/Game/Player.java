@@ -188,7 +188,7 @@ public class Player extends Entity {
                             boom.setDelay(100);
                             boomState = true;
                             boomKind = 0;
-                        } else b.y -= speed;
+                        } else b.y -= 2 * speed;
                         if (collision.BulletCollision(b, 3.2f * speed, 0)) {
                             iter.remove();
                             timerIntervalAfterBoom.start();
@@ -215,13 +215,22 @@ public class Player extends Entity {
                             boom = new Boom(b.x, b.y, atlas);
                             boom.setDelay(100);
                             boomState = true;
-                        } else b.x += speed;
+                            boomKind = 0;
+                        } else b.x += 2 * speed;
                         if (collision.BulletCollision(b, speed, 3)) {
                             iter.remove();
                             timerIntervalAfterBoom.start();
                             boom = new Boom(b.x, b.y + 10, atlas);
                             boom.setDelay(100);
                             boomState = true;
+                            boomKind = 0;
+                        } else if (collision.EnemyTankBulletCollision(b, speed, 3)) {
+                            iter.remove();
+                            timerIntervalAfterBoom.start();
+                            boom = new Boom(b.x, b.y + 10, atlas);
+                            boom.setDelay(100);
+                            boomState = true;
+                            boomKind = 6;
                         }
                     }
                 } else if (pair.getKey() == Heading.values()[2]) {
@@ -234,13 +243,22 @@ public class Player extends Entity {
                             boom = new Boom(b.x, b.y, atlas);
                             boom.setDelay(100);
                             boomState = true;
-                        } else b.x -= speed;
+                            boomKind = 0;
+                        } else b.x -= 2 * speed;
                         if (collision.BulletCollision(b, 3.2f * speed, 2)) {
                             iter.remove();
                             timerIntervalAfterBoom.start();
                             boom = new Boom(b.x - 10, b.y + 10, atlas);
                             boom.setDelay(100);
                             boomState = true;
+                            boomKind = 0;
+                        } else if (collision.EnemyTankBulletCollision(b, 3.2f * speed, 2)) {
+                            iter.remove();
+                            timerIntervalAfterBoom.start();
+                            boom = new Boom(b.x - 10, b.y + 10, atlas);
+                            boom.setDelay(100);
+                            boomState = true;
+                            boomKind = 6;
                         }
                     }
                 } else if (pair.getKey() == Heading.values()[3]) {
@@ -253,13 +271,22 @@ public class Player extends Entity {
                             boom = new Boom(b.x, b.y, atlas);
                             boom.setDelay(100);
                             boomState = true;
-                        } else b.y += speed;
+                            boomKind = 0;
+                        } else b.y += 2 * speed;
                         if (collision.BulletCollision(b, speed, 1)) {
                             iter.remove();
                             timerIntervalAfterBoom.start();
                             boom = new Boom(b.x, b.y + 25, atlas);
                             boom.setDelay(100);
                             boomState = true;
+                            boomKind = 0;
+                        } else if (collision.EnemyTankBulletCollision(b, speed, 1)) {
+                            iter.remove();
+                            timerIntervalAfterBoom.start();
+                            boom = new Boom(b.x, b.y + 25, atlas);
+                            boom.setDelay(100);
+                            boomState = true;
+                            boomKind = 6;
                         }
                     }
                 }

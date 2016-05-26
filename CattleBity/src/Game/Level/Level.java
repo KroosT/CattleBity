@@ -26,7 +26,8 @@ public class Level {
     private List<Point> iceCoords;
     private List<Point> emptyCoords;
     private List<Point> metalCoords;
-    private Point eagleCoords;
+    private List<Point> infoCoords;
+    private List<Point> eagleCoords;
 
     public Level(TextureAtlas atlas) {
         tiles = new HashMap<>();
@@ -43,6 +44,7 @@ public class Level {
         tiles.put(TileType.EAGLE, new Tile(atlas.Cut(304, 4 * TILE_SCALE, EAGLE_SCALE, EAGLE_SCALE), 3, TileType.EAGLE));
         tiles.put(TileType.EMPTY, new Tile(atlas.Cut(36 * TILE_SCALE, 6 * TILE_SCALE, TILE_SCALE, TILE_SCALE),
                 TILE_IN_GAME_SCALE, TileType.EMPTY));
+        tiles.put(TileType.INFO, new Tile(atlas.Cut(368, 214, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE, TileType.INFO));
         tileMap = Utils.LevelLoader("CattleBity\\res\\level.lvl");
         grassCoords = new ArrayList<>();
         tilesCoords = new ArrayList<>();
@@ -50,11 +52,13 @@ public class Level {
         iceCoords = new ArrayList<>();
         emptyCoords = new ArrayList<>();
         metalCoords = new ArrayList<>();
+        infoCoords = new ArrayList<>();
+        eagleCoords = new ArrayList<>();
         for (int i = 0; i < tileMap.length; i++) {
             for (int j = 0; j < tileMap[i].length; j++) {
                 Tile tile = tiles.get(TileType.fromNumeric(tileMap[i][j]));
                 if (tile.getType() == TileType.EAGLE) {
-                    eagleCoords = new Point(j * SCALED_TILE_SIZE, i * SCALED_TILE_SIZE);
+                    eagleCoords.add(new Point(j * SCALED_TILE_SIZE, i * SCALED_TILE_SIZE));
                 }
                 else if (tile.getType() == TileType.GRASS)
                     grassCoords.add(new Point(j * SCALED_TILE_SIZE, i * SCALED_TILE_SIZE));
@@ -66,6 +70,8 @@ public class Level {
                     emptyCoords.add(new Point(j * SCALED_TILE_SIZE, i * SCALED_TILE_SIZE));
                 else if (tile.getType() == TileType.METAL)
                     metalCoords.add(new Point(j * SCALED_TILE_SIZE, i * SCALED_TILE_SIZE));
+                else if (tile.getType() == TileType.INFO)
+                    infoCoords.add(new Point(j * SCALED_TILE_SIZE, i * SCALED_TILE_SIZE));
                 else
                     tilesCoords.add(new Point(j * SCALED_TILE_SIZE, i * SCALED_TILE_SIZE));
             }
@@ -76,7 +82,7 @@ public class Level {
         return tilesCoords;
     }
 
-    public Point getEagleCoords() {
+    public List<Point> getEagleCoords() {
         return eagleCoords;
     }
 
@@ -96,6 +102,10 @@ public class Level {
         return metalCoords;
     }
 
+    public List<Point> getInfoCoords() {
+        return infoCoords;
+    }
+
     public void destroyTile(int x, int y) {
         tileMap[x][y] = 0;
     }
@@ -104,8 +114,8 @@ public class Level {
         tilesCoords.remove(p);
     }
 
-    public void removeEagleCoords() {
-        eagleCoords = null;
+    public void removeEagleCoords(Point p) {
+        eagleCoords.remove(p);
     }
 
     public void update() {
