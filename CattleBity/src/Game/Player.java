@@ -12,7 +12,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.*;
-import javax.sound.sampled.Clip;
 import javax.swing.Timer;
 
 import Graphics.Sprite;
@@ -59,7 +58,11 @@ public class Player extends Entity {
     private int boomKind;
     private boolean interval;
     private Timer timer;
-    private AudioClip clip;
+    private AudioClip shot;
+    private AudioClip move;
+    private File moveFile = new File("CattleBity\\res\\Sounds\\move.wav");
+    private File shotFile = new File("CattleBity\\res\\Sounds\\shot.wav");
+
 
     public Player(float x, float y, float scale, float speed, TextureAtlas atlas){
         super(EntityType.Player, x, y);
@@ -82,6 +85,12 @@ public class Player extends Entity {
                 timer.stop();
             }
         });
+        try {
+            move = Applet.newAudioClip(moveFile.toURL());
+            shot = Applet.newAudioClip(shotFile.toURL());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -94,25 +103,29 @@ public class Player extends Entity {
             heading = NORTH;
             if (collision.TankCollision(player, 3.2f * speed, 0) || collision.EnemyTankPlayerTankCollision(player, speed, 0))
                 newY += speed;
+            //move.play();
         } else if (input.getKey(KeyEvent.VK_DOWN)) {
             newY += speed;
             heading = SOUTH;
             if (collision.TankCollision(player, speed, 1) || collision.EnemyTankPlayerTankCollision(player, speed, 1))
                 newY -= speed;
+            //move.play();
         } else if (input.getKey(KeyEvent.VK_LEFT)) {
             newX -= speed;
             heading = WEST;
             if (collision.TankCollision(player, 3.2f * speed, 2) || collision.EnemyTankPlayerTankCollision(player, speed, 2))
                 newX += speed;
+            //move.play();
         } else if (input.getKey(KeyEvent.VK_RIGHT)) {
             newX += speed;
             heading = EAST;
             if (collision.TankCollision(player, speed, 3) || collision.EnemyTankPlayerTankCollision(player, speed, 3))
                 newX -= speed;
+            //move.play();
         }
 
         if (input.getKey(KeyEvent.VK_SLASH)) {
-            File file = new File("CattleBity\\res\\Sounds\\shot.wav");
+
             if (bullet == null && interval) {
                 switch (heading) {
                     case NORTH:
@@ -128,13 +141,7 @@ public class Player extends Entity {
                         bullet = new Bullet(x + 12, y + SPRITE_SCALE + 10, 2, 3, atlas);
                         break;
                 }
-                try {
-                    clip = null;
-                    clip = Applet.newAudioClip(file.toURL());
-                    clip.play();
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
+                shot.play();
                 shotOccured = true;
             }
         }
