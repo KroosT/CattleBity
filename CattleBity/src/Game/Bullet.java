@@ -48,10 +48,28 @@ public class Bullet extends Entity{
         }
     }
 
+    public int getHeading() {
+        switch (heading){
+            case NORTH:
+                return 0;
+            case EAST:
+                return 1;
+            case WEST:
+                return 2;
+            case SOUTH:
+                return 3;
+            default:
+                return 0;
+        }
+    }
+
     @Override
     public void update(Input input, Collision collision, Player player){
 
     }
+
+    @Override
+    public void updateSecondPlayer(Input input, Collision collision, SecondPlayer secondPlayer) {}
 
     @Override
     public void render(Graphics2D g){

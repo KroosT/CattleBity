@@ -24,6 +24,7 @@ public class Menu extends Entity {
 
     private BufferedImage menu;
     private Position position;
+    private SecondPlayer secondPlayer;
 
     public Menu(String menuName) {
         super(EntityType.Menu, 0, 0);
@@ -59,12 +60,26 @@ public class Menu extends Entity {
             } else if (position == DOWN) {
                 Game.setChoiced(true);
                 Game.setMenuChoice(1);
+                player.setX(415);
+                player.setY(510);
+                player.setHeading(0);
+                secondPlayer.setX(306);
+                secondPlayer.setY(510);
+                secondPlayer.setHeading(0);
             }
         }
+    }
+
+    public void setSecondPlayer(SecondPlayer secondPlayer) {
+        this.secondPlayer = secondPlayer;
     }
 
     @Override
     public void render(Graphics2D g) {
         g.drawImage(menu, 0, 0, null);
     }
+
+    @Override
+    public void updateSecondPlayer(Input input, Collision collision, SecondPlayer secondPlayer) {}
+
 }

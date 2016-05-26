@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" build-on-make="true" name="CattleBity:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/CattleBity</output-path>
+    <output-path>$PROJECT_DIR$/out/artifacts/CattleBity.jar</output-path>
     <root id="archive" name="CattleBity.jar">
       <element id="module-output" name="CattleBity" />
     </root>

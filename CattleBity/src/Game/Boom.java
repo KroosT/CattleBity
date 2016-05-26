@@ -86,6 +86,9 @@ public class Boom extends Entity {
     }
 
     @Override
+    public void updateSecondPlayer(Input input, Collision collision, SecondPlayer secondPlayer) {}
+
+    @Override
     public void render(Graphics2D g) {
     }
 }

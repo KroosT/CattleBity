@@ -37,6 +37,8 @@ public abstract class Entity {
 
     public abstract void update(Input input, Collision collision, Player player);
 
+    public abstract void updateSecondPlayer(Input input, Collision collision, SecondPlayer secondPlayer);
+
     public abstract void render(Graphics2D g);
 
 }

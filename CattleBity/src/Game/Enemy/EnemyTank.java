@@ -5,15 +5,17 @@ import IO.Input;
 import Graphics.TextureAtlas;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 
 import Graphics.Sprite2;
 import Graphics.SpriteSheet2;
+import javax.swing.Timer;
 
 import static Game.Enemy.EnemyTank.EnemyTankType.*;
-import static Game.Enemy.EnemyTank.Direction.*;
 
 public class EnemyTank extends Entity {
 
@@ -31,15 +33,15 @@ public class EnemyTank extends Entity {
 
     public enum EnemyTankType {
 
-        GREY_NORTH(128,2,14,14),
+        GREY_NORTH(128,2,14,13),
         GREY_EAST(225,1,14,14),
         GREY_WEST(162,1,14,14),
         GREY_SOUTH(192,1,14,14),
-        GREEN_NORTH(0,131,14,14),
+        GREEN_NORTH(0,131,14,13),
         GREEN_EAST(96,129,14,14),
         GREEN_WEST(33,129,14,14),
         GREEN_SOUTH(64,129,14,14),
-        RED_NORTH(129,131,14,14),
+        RED_NORTH(129,131,14,13),
         RED_EAST(224,129,14,14),
         RED_WEST(162,129,14,14),
         RED_SOUTH(192,129,14,14);
@@ -63,16 +65,13 @@ public class EnemyTank extends Entity {
     private EnemyTankType enemyTankType;
     private float scale;
     private float speed;
-    private List<Bullet> bulletListNorth;
-    private List<Bullet> bulletListEast;
-    private List<Bullet> bulletListWest;
-    private List<Bullet> bulletListSouth;
-    private Map<Direction, List<Bullet>> bulletMap;
-    private Direction direction;
+    private Bullet bullet;
     private Boom boom;
     private int boomKind;
     private boolean boomState;
     private int currFrame;
+    private boolean interval;
+    private Timer timer;
     private boolean shotOccured;
 
     public EnemyTank(float x, float y, float scale, float speed, TextureAtlas atlas){
@@ -81,129 +80,123 @@ public class EnemyTank extends Entity {
         this.atlas = atlas;
         this.scale = scale;
         this.speed = speed;
-        enemyTankType = GREY_SOUTH;
+        enemyTankType = RED_SOUTH;
         enemyTankMap = new HashMap<EnemyTankType, Sprite2>();
         for (EnemyTankType t : EnemyTankType.values()) {
             SpriteSheet2 sheet = new SpriteSheet2(t.texture(atlas));
             Sprite2 sprite = new Sprite2(sheet, scale);
             enemyTankMap.put(t, sprite);
         }
-        bulletListEast = new ArrayList<>();
-        bulletListNorth = new ArrayList<>();
-        bulletListSouth = new ArrayList<>();
-        bulletListWest = new ArrayList<>();
-        bulletMap = new HashMap<Direction, List<Bullet>>();
+        interval = true;
+        timer = new Timer(250, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                interval = true;
+                timer.stop();
+            }
+        });
     }
 
-    public void shot() {
-        if (enemyTankType == GREY_NORTH || enemyTankType == RED_NORTH || enemyTankType == GREEN_NORTH) {
-            bulletListNorth.add(new Bullet(x + 12, y, 2, 0, atlas));
-            bulletMap.put(NORTH, bulletListNorth);
-        } else if (enemyTankType == GREY_EAST || enemyTankType == RED_EAST || enemyTankType == GREEN_EAST) {
-            bulletListEast.add(new Bullet(x + SPRITE_SCALE + 10, y + 12, 2, 1, atlas));
-            bulletMap.put(EAST, bulletListEast);
-        } else if (enemyTankType == GREY_WEST || enemyTankType == RED_WEST || enemyTankType == GREEN_WEST) {
-            bulletListWest.add(new Bullet(x, y + 12, 2, 2, atlas));
-            bulletMap.put(WEST, bulletListWest);
-        } else if (enemyTankType == GREY_SOUTH || enemyTankType == RED_SOUTH || enemyTankType == GREEN_SOUTH) {
-            bulletListSouth.add(new Bullet(x + 12, y + SPRITE_SCALE + 10, 2, 3, atlas));
-            bulletMap.put(SOUTH, bulletListSouth);
+    public void shot(Collision collision) {
+        if (bullet == null && interval) {
+            if (enemyTankType == GREY_NORTH || enemyTankType == RED_NORTH || enemyTankType == GREEN_NORTH) {
+                bullet = new Bullet(x + 12, y, 2, 0, atlas);
+            } else if (enemyTankType == GREY_EAST || enemyTankType == RED_EAST || enemyTankType == GREEN_EAST) {
+                bullet = new Bullet(x + SPRITE_SCALE + 10, y + 12, 2, 1, atlas);
+            } else if (enemyTankType == GREY_WEST || enemyTankType == RED_WEST || enemyTankType == GREEN_WEST) {
+                bullet = new Bullet(x, y + 12, 2, 2, atlas);
+            } else if (enemyTankType == GREY_SOUTH || enemyTankType == RED_SOUTH || enemyTankType == GREEN_SOUTH) {
+                bullet = new Bullet(x + 12, y + SPRITE_SCALE + 10, 2, 3, atlas);
+            }
+            shotOccured = true;
         }
-    }
-
-    public void showShot(Collision collision) {
-        shotOccured = true;
-        Iterator it = bulletMap.entrySet().iterator();
-        while (it.hasNext()) {
-            HashMap.Entry pair = (HashMap.Entry) it.next();
-            if (pair.getKey() == Direction.values()[0]) {
-                List list = (List)(pair.getValue());
-                for (Iterator iter = list.iterator(); iter.hasNext(); ) {
-                    Bullet b = (Bullet) iter.next();
-                    if (b.getY() - speed < 0) {
-                        iter.remove();
-                        //timerIntervalAfterBoom.start();
-                        boom = new Boom(b.getX(), b.getY(), atlas);
-                        boom.setDelay(100);
-                        boomState = true;
-                        boomKind = 0;
-                    } else b.setY(b.getY() - 2 * speed);
-                    if (collision.BulletCollision(b, 3.2f * speed, 0)) {
-                        iter.remove();
-                        //timerIntervalAfterBoom.start();
-                        boom = new Boom(b.getX(), b.getY(), atlas);
-                        boom.setDelay(100);
-                        boomState = true;
-                        boomKind = 0;
-                    }
+        if (shotOccured) {
+            if (bullet.getHeading() == 0) {
+                if (bullet.getY() - speed < 0) {
+                    boom = new Boom(bullet.getX(), bullet.getY(), atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    interval = false;
+                    timer.start();
+                    shotOccured = false;
+                } else bullet.setY(bullet.getY() - 2 * speed);
+                if (collision.BulletCollision(bullet, 3.2f * speed, 0)) {
+                    boom = new Boom(bullet.getX(), bullet.getY(), atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    interval = false;
+                    timer.start();
+                    shotOccured = false;
                 }
-            } else if (pair.getKey() == Direction.values()[1]) {
-                List list = (List)(pair.getValue());
-                for (Iterator iter = list.iterator(); iter.hasNext(); ) {
-                    Bullet b = (Bullet) iter.next();
-                    if (b.getX() + speed > Game.WIDTH) {
-                        iter.remove();
-                        //timerIntervalAfterBoom.start();
-                        boom = new Boom(b.getX(), b.getY(), atlas);
-                        boom.setDelay(100);
-                        boomState = true;
-                        boomKind = 0;
-                    } else b.setX(b.getX() + 2 * speed);
-                    if (collision.BulletCollision(b, speed, 3)) {
-                        iter.remove();
-                        //timerIntervalAfterBoom.start();
-                        boom = new Boom(b.getX(), b.getY() + 10, atlas);
-                        boom.setDelay(100);
-                        boomState = true;
-                        boomKind = 0;
-                    }
+            } else if (bullet.getHeading() == 1) {
+                if (bullet.getX() + speed > Game.WIDTH) {
+                    boom = new Boom(bullet.getX(), bullet.getY(), atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    interval = false;
+                    timer.start();
+                    shotOccured = false;
+                } else bullet.setX(bullet.getX() + 2 * speed);
+                if (collision.BulletCollision(bullet, speed, 3)) {
+                    boom = new Boom(bullet.getX(), bullet.getY() + 10, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    interval = false;
+                    timer.start();
+                    shotOccured = false;
                 }
-            } else if (pair.getKey() == Direction.values()[2]) {
-                List list = (List)(pair.getValue());
-                for (Iterator iter = list.iterator(); iter.hasNext(); ) {
-                    Bullet b = (Bullet) iter.next();
-                    if (b.getX() - speed < 0) {
-                        iter.remove();
-                        //timerIntervalAfterBoom.start();
-                        boom = new Boom(b.getX(), b.getY(), atlas);
-                        boom.setDelay(100);
-                        boomState = true;
-                        boomKind = 0;
-                    } else b.setX(b.getX() - 2 * speed);
-                    if (collision.BulletCollision(b, 3.2f * speed, 2)) {
-                        iter.remove();
-                        //timerIntervalAfterBoom.start();
-                        boom = new Boom(b.getX() - 10, b.getY() + 10, atlas);
-                        boom.setDelay(100);
-                        boomState = true;
-                        boomKind = 0;
-                    }
+            } else if (bullet.getHeading() == 2) {
+                if (bullet.getX() - speed < 0) {
+                    boom = new Boom(bullet.getX(), bullet.getY(), atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    interval = false;
+                    timer.start();
+                    shotOccured = false;
+                } else bullet.setX(bullet.getX() - 2 * speed);
+                if (collision.BulletCollision(bullet, 3.2f * speed, 2)) {
+                    boom = new Boom(bullet.getX() - 10, bullet.getY() + 10, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    interval = false;
+                    timer.start();
+                    shotOccured = false;
                 }
-            } else if (pair.getKey() == Direction.values()[3]) {
-                List list = (List) (pair.getValue());
-                for (Iterator iter = list.iterator(); iter.hasNext(); ) {
-                    Bullet b = (Bullet) iter.next();
-                    if (b.getY() - speed > Game.HEIGHT) {
-                        iter.remove();
-                        //timerIntervalAfterBoom.start();
-                        boom = new Boom(b.getX(), b.getY(), atlas);
-                        boom.setDelay(100);
-                        boomState = true;
-                        boomKind = 0;
-                    } else b.setY(b.getY() + 2 * speed);
-                    if (collision.BulletCollision(b, speed, 1)) {
-                        iter.remove();
-                        //timerIntervalAfterBoom.start();
-                        boom = new Boom(b.getX(), b.getY() + 25, atlas);
-                        boom.setDelay(100);
-                        boomState = true;
-                        boomKind = 0;
-                    }
+            } else if (bullet.getHeading() == 3) {
+                if (bullet.getY() - speed > Game.HEIGHT) {
+                    boom = new Boom(bullet.getX(), bullet.getY(), atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    interval = false;
+                    timer.start();
+                    shotOccured = false;
+                } else bullet.setY(bullet.getY() + 2 * speed);
+                if (collision.BulletCollision(bullet, speed, 1)) {
+                    boom = new Boom(bullet.getX(), bullet.getY() + 25, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    interval = false;
+                    timer.start();
+                    shotOccured = false;
                 }
             }
         }
-        if (bulletListNorth.isEmpty() && bulletListWest.isEmpty() && bulletListEast.isEmpty() && bulletListSouth.isEmpty())
-            shotOccured = false;
 
         if (boomState) {
             currFrame = boom.update(boomKind);
@@ -214,10 +207,6 @@ public class EnemyTank extends Entity {
         }
     }
 
-    public boolean getShotState() {
-        return shotOccured;
-    }
-
     public float getSpeed() {
         return speed;
     }
@@ -226,21 +215,44 @@ public class EnemyTank extends Entity {
         this.speed = speed;
     }
 
+    public EnemyTankType fromNumericGrey(int direction) {
+        if (direction == 0)
+            return GREY_NORTH;
+        else if (direction == 1)
+            return GREY_EAST;
+        else if (direction == 2)
+            return GREY_WEST;
+        else return GREY_SOUTH;
+    }
+
+    public EnemyTankType fromNumericGreen(int direction) {
+        if (direction == 0)
+            return GREEN_NORTH;
+        else if (direction == 1)
+            return GREEN_EAST;
+        else if (direction == 2)
+            return GREEN_WEST;
+        else return GREEN_SOUTH;
+    }
+
+    public EnemyTankType fromNumericRed(int direction) {
+        if (direction == 0)
+            return RED_NORTH;
+        else if (direction == 1)
+            return RED_EAST;
+        else if (direction == 2)
+            return RED_WEST;
+        else return RED_SOUTH;
+    }
+
     public void changeDirection() {
-        switch (enemyTankType) {
-            case GREY_SOUTH:
-                this.enemyTankType = GREY_EAST;
-                break;
-            case GREY_NORTH:
-                this.enemyTankType = GREY_WEST;
-                break;
-            case GREY_EAST:
-                this.enemyTankType = GREY_NORTH;
-                break;
-            case GREY_WEST:
-                this.enemyTankType = GREY_NORTH;
-                break;
-        }
+        Random random = new Random();
+        if (enemyTankType == GREY_NORTH || enemyTankType == GREY_SOUTH || enemyTankType == GREY_WEST || enemyTankType == GREY_EAST)
+            enemyTankType = fromNumericGrey(random.nextInt(4));
+        else if (enemyTankType == RED_NORTH || enemyTankType == RED_SOUTH || enemyTankType == RED_WEST || enemyTankType == RED_EAST)
+            enemyTankType = fromNumericRed(random.nextInt(4));
+        else
+            enemyTankType = fromNumericGreen(random.nextInt(4));
     }
 
     public int getDirection() {
@@ -259,16 +271,13 @@ public class EnemyTank extends Entity {
     }
 
     @Override
+    public void updateSecondPlayer(Input input, Collision collision, SecondPlayer secondPlayer) {}
+
+    @Override
     public void render(Graphics2D g) {
         enemyTankMap.get(enemyTankType).render(g, x, y);
         if (shotOccured) {
-            Iterator it = bulletMap.entrySet().iterator();
-            while (it.hasNext()) {
-                HashMap.Entry pair = (HashMap.Entry) it.next();
-                List list = (List)(pair.getValue());
-                for (Object b : list)
-                    ((Bullet) (b)).render(g);
-            }
+            bullet.render(g);
         }
         if (boomState) {
             try {

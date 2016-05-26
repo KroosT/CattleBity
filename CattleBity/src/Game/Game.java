@@ -10,8 +10,6 @@ import utils.Time;
 import Graphics.TextureAtlas;
 
 import java.awt.*;
-import java.util.*;
-import java.util.List;
 
 public class Game implements Runnable {
 
@@ -34,6 +32,7 @@ public class Game implements Runnable {
     private TextureAtlas atlas;
     private Menu menu;
     private Player player;
+    private SecondPlayer secondPlayer;
     private Level level;
     private Collision collision;
     private static int menuChoice;
@@ -51,11 +50,15 @@ public class Game implements Runnable {
         atlas = new TextureAtlas(ATLAS_FILE_NAME);
         menu = new Menu(MENU_FILE_NAME);
         player = new Player(230, 323, 2, 2, atlas);
+        secondPlayer = new SecondPlayer(130, 323, 2, 2, atlas);
         level = new Level(atlas);
         collision = new Collision(level.getTilesCoords(), level);
-        enemyStrategy = new EnemyStrategy(atlas, collision);
+        enemyStrategy = new EnemyStrategy(atlas, collision, player, secondPlayer);
         collision.setEnemyStrategy(enemyStrategy);
         enemyStrategy.addEnemyTank(60, 60);
+        enemyStrategy.addEnemyTank(500, 40);
+        enemyStrategy.addEnemyTank(180, 60);
+        enemyStrategy.addEnemyTank(270, 60);
         choiced = false;
 
     }
@@ -85,6 +88,7 @@ public class Game implements Runnable {
 
     private void update() {
         if (!choiced){
+            menu.setSecondPlayer(secondPlayer);
             menu.update(input, collision, player);
         }
         else {
@@ -93,7 +97,10 @@ public class Game implements Runnable {
                 enemyStrategy.update();
                 level.update();
             } else if (menuChoice == 1) {
-
+                player.update(input, collision, player);
+                secondPlayer.updateSecondPlayer(input, collision, secondPlayer);
+                enemyStrategy.update();
+                level.update();
             }
         }
     }
@@ -111,7 +118,11 @@ public class Game implements Runnable {
                 enemyStrategy.render(graphics);
                 level.renderGrass(graphics);
             } else if (menuChoice == 1) {
-
+                level.render(graphics);
+                player.render(graphics);
+                secondPlayer.render(graphics);
+                enemyStrategy.render(graphics);
+                level.renderGrass(graphics);
             }
         }
 

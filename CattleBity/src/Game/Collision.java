@@ -112,6 +112,82 @@ public class Collision {
         return col;
     }
 
+    public boolean SecondPlayerCollision(SecondPlayer secondPlayer, float speed, int var) {
+
+        boolean col = false;
+        Rectangle playerRect;
+        switch (var) {
+            case 0:
+                playerRect = new Rectangle((int)secondPlayer.x, (int)(secondPlayer.y - speed), 30, 30);
+                break;
+            case 1:
+                playerRect = new Rectangle((int)secondPlayer.x, (int)(secondPlayer.y + speed), 30, 30);
+                break;
+            case 2:
+                playerRect = new Rectangle((int)(secondPlayer.x - speed), (int)secondPlayer.y, 30, 30);
+                break;
+            case 3:
+                playerRect = new Rectangle((int)(secondPlayer.x + speed), (int)secondPlayer.y, 30, 30);
+                break;
+            default:
+                playerRect = new Rectangle((int)secondPlayer.x, (int)secondPlayer.y, 30, 30);
+                break;
+        }
+
+        for (Point p : coords) {
+            Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+            if (playerRect.intersects(pRect)){
+                col = true;
+                break;
+            }
+        }
+        for (Point p : waterCoords) {
+            Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+            if (playerRect.intersects(pRect)){
+                col = true;
+                break;
+            }
+        }
+        for (Point p : metalCoords) {
+            Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+            if (playerRect.intersects(pRect)){
+                col = true;
+                break;
+            }
+        }
+        for (Point p : infoCoords) {
+            Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+            if (playerRect.intersects(pRect)){
+                col = true;
+                break;
+            }
+        }
+        for (Point p : iceCoords) {
+            Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+            if (playerRect.intersects(pRect)){
+                secondPlayer.setSpeed(4);
+                iceCol = true;
+                break;
+            }
+        }
+        if (iceCol) {
+            for (Point p : emptyCoords) {
+                Rectangle pRect = new Rectangle(p.x, p.y, 10, 10);
+                if (playerRect.intersects(pRect)) {
+                    secondPlayer.setSpeed(2);
+                    iceCol = false;
+                    break;
+                }
+            }
+        }
+        for (Point p : eagleCoords) {
+            Rectangle eagleRect = new Rectangle(p.x, p.y, 42, 42);
+            if (playerRect.intersects(eagleRect))
+                col = true;
+        }
+        return col;
+    }
+
     public boolean BulletCollision(Bullet bullet, float speed, int var) {
 
         boolean col = false;
@@ -142,12 +218,6 @@ public class Collision {
                 lvl.removeCoords(p);
                 break;
             }
-//            Rectangle eagleRect = new Rectangle(eagleCoords.x, eagleCoords.y, 42, 42);
-//            if (bulletRect.intersects(eagleRect)) {
-//                col = true;
-//                lvl.destroyTile(eagleCoords.y / TILE_SCALE, eagleCoords.x / TILE_SCALE);
-//                lvl.removeEagleCoords();
-//            }
         }
         for (Point p : eagleCoords) {
             Rectangle eagleRect = new Rectangle(p.x, p.y, 42, 42);
@@ -193,6 +263,37 @@ public class Collision {
                 break;
             default:
                 playerRect = new Rectangle((int)player.x, (int)player.y, 30, 30);
+                break;
+        }
+
+        for (EnemyTank t : enemyTankList) {
+            Rectangle tRect = new Rectangle((int)t.x, (int)t.y, 30, 30);
+            if (playerRect.intersects(tRect)) {
+                col = true;
+            }
+        }
+
+        return col;
+    }
+
+    public boolean EnemyTankSecondPlayerTankCollision(SecondPlayer secondPlayer, float speed, int direction) {
+        boolean col = false;
+        Rectangle playerRect;
+        switch (direction) {
+            case 0:
+                playerRect = new Rectangle((int)secondPlayer.x, (int)(secondPlayer.y - 2 * speed), 30, 30);
+                break;
+            case 1:
+                playerRect = new Rectangle((int)secondPlayer.x, (int)(secondPlayer.y + 2 * speed), 30, 30);
+                break;
+            case 2:
+                playerRect = new Rectangle((int)(secondPlayer.x - 2 * speed), (int)secondPlayer.y, 30, 30);
+                break;
+            case 3:
+                playerRect = new Rectangle((int)(secondPlayer.x + 2 * speed), (int)secondPlayer.y, 30, 30);
+                break;
+            default:
+                playerRect = new Rectangle((int)secondPlayer.x, (int)secondPlayer.y, 30, 30);
                 break;
         }
 

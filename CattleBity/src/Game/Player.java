@@ -2,13 +2,17 @@ package Game;
 
 import IO.Input;
 
+import java.applet.Applet;
+import java.applet.AudioClip;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.*;
-import java.util.List;
+import javax.sound.sampled.Clip;
 import javax.swing.Timer;
 
 import Graphics.Sprite;
@@ -41,14 +45,6 @@ public class Player extends Entity {
         protected BufferedImage texture(TextureAtlas atlas) {
             return atlas.Cut(x, y, w, h);
         }
-
-        protected int getWidth() {
-            return w;
-        }
-
-        protected int getHeight() {
-            return h;
-        }
     }
 
     private Heading heading;
@@ -56,19 +52,14 @@ public class Player extends Entity {
     private float scale;
     private float speed;
     private TextureAtlas atlas;
-    private Map<Heading, List<Bullet>> bulletMap;
-    private List<Bullet> bulletListNorth;
-    private List<Bullet> bulletListEast;
-    private List<Bullet> bulletListWest;
-    private List<Bullet> bulletListSouth;
-    private boolean interval;
-    private boolean intervalAfterBoom;
-    private Timer timerInterval;
-    private Timer timerIntervalAfterBoom;
+    private Bullet bullet;
     private Boom boom;
     private boolean boomState;
     private int currFrame;
     private int boomKind;
+    private boolean interval;
+    private Timer timer;
+    private AudioClip clip;
 
     public Player(float x, float y, float scale, float speed, TextureAtlas atlas){
         super(EntityType.Player, x, y);
@@ -83,23 +74,12 @@ public class Player extends Entity {
             Sprite sprite = new Sprite(sheet, scale);
             spriteMap.put(h, sprite);
         }
-        bulletListNorth = new ArrayList<Bullet>();
-        bulletListEast = new ArrayList<Bullet>();
-        bulletListWest = new ArrayList<Bullet>();
-        bulletListSouth = new ArrayList<Bullet>();
-        bulletMap = new HashMap<Heading, List<Bullet>>();
         interval = true;
-        intervalAfterBoom = true;
-        timerInterval = new Timer(700, new ActionListener() {
+        timer = new Timer(250, new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 interval = true;
-                timerInterval.stop();
-            }
-        });
-        timerIntervalAfterBoom = new Timer(200, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                intervalAfterBoom = true;
-                timerIntervalAfterBoom.stop();
+                timer.stop();
             }
         });
     }
@@ -131,35 +111,32 @@ public class Player extends Entity {
                 newX -= speed;
         }
 
-        if (input.getKey(KeyEvent.VK_SPACE)) {
-            if (interval && intervalAfterBoom) {
-                timerInterval.start();
+        if (input.getKey(KeyEvent.VK_SLASH)) {
+            File file = new File("CattleBity\\res\\Sounds\\shot.wav");
+            if (bullet == null && interval) {
                 switch (heading) {
                     case NORTH:
-                        Bullet bulNorth = new Bullet(x + 12, y, 2, 0, atlas);
-                        bulletListNorth.add(bulNorth);
-                        bulletMap.put(heading, bulletListNorth);
+                        bullet = new Bullet(x + 12, y, 2, 0, atlas);
                         break;
                     case EAST:
-                        Bullet bulEast = new Bullet(x + SPRITE_SCALE + 10, y + 12, 2, 1, atlas);
-                        bulletListEast.add(bulEast);
-                        bulletMap.put(heading, bulletListEast);
+                        bullet = new Bullet(x + SPRITE_SCALE + 10, y + 12, 2, 1, atlas);
                         break;
                     case WEST:
-                        Bullet bulWest = new Bullet(x, y + 12, 2, 2, atlas);
-                        bulletListWest.add(bulWest);
-                        bulletMap.put(heading, bulletListWest);
+                        bullet = new Bullet(x, y + 12, 2, 2, atlas);
                         break;
                     case SOUTH:
-                        Bullet bulSouth = new Bullet(x + 12, y + SPRITE_SCALE + 10, 2, 3, atlas);
-                        bulletListSouth.add(bulSouth);
-                        bulletMap.put(heading, bulletListSouth);
+                        bullet = new Bullet(x + 12, y + SPRITE_SCALE + 10, 2, 3, atlas);
                         break;
                 }
+                try {
+                    clip = null;
+                    clip = Applet.newAudioClip(file.toURL());
+                    clip.play();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
                 shotOccured = true;
-                interval = false;
             }
-
         }
 
         if (newX < 0) {
@@ -174,126 +151,127 @@ public class Player extends Entity {
         }
 
         if (shotOccured) {
-            Iterator it = bulletMap.entrySet().iterator();
-            while (it.hasNext()) {
-                HashMap.Entry pair = (HashMap.Entry) it.next();
-                if (pair.getKey() == Heading.values()[0]) {
-                    List list = (List)(pair.getValue());
-                    for (Iterator iter = list.iterator(); iter.hasNext(); ) {
-                        Bullet b = (Bullet) iter.next();
-                        if (b.y - speed < 0) {
-                            iter.remove();
-                            timerIntervalAfterBoom.start();
-                            boom = new Boom(b.x, b.y, atlas);
-                            boom.setDelay(100);
-                            boomState = true;
-                            boomKind = 0;
-                        } else b.y -= 2 * speed;
-                        if (collision.BulletCollision(b, 3.2f * speed, 0)) {
-                            iter.remove();
-                            timerIntervalAfterBoom.start();
-                            boom = new Boom(b.x, b.y, atlas);
-                            boom.setDelay(100);
-                            boomState = true;
-                            boomKind = 0;
-                        } else if (collision.EnemyTankBulletCollision(b, 3.2f * speed, 0)) {
-                            iter.remove();
-                            timerIntervalAfterBoom.start();
-                            boom = new Boom(b.x, b.y, atlas);
-                            boom.setDelay(100);
-                            boomState = true;
-                            boomKind = 6;
-                        }
-                    }
-                } else if (pair.getKey() == Heading.values()[1]) {
-                    List list = (List)(pair.getValue());
-                    for (Iterator iter = list.iterator(); iter.hasNext(); ) {
-                        Bullet b = (Bullet) iter.next();
-                        if (b.x + speed > Game.WIDTH) {
-                            iter.remove();
-                            timerIntervalAfterBoom.start();
-                            boom = new Boom(b.x, b.y, atlas);
-                            boom.setDelay(100);
-                            boomState = true;
-                            boomKind = 0;
-                        } else b.x += 2 * speed;
-                        if (collision.BulletCollision(b, speed, 3)) {
-                            iter.remove();
-                            timerIntervalAfterBoom.start();
-                            boom = new Boom(b.x, b.y + 10, atlas);
-                            boom.setDelay(100);
-                            boomState = true;
-                            boomKind = 0;
-                        } else if (collision.EnemyTankBulletCollision(b, speed, 3)) {
-                            iter.remove();
-                            timerIntervalAfterBoom.start();
-                            boom = new Boom(b.x, b.y + 10, atlas);
-                            boom.setDelay(100);
-                            boomState = true;
-                            boomKind = 6;
-                        }
-                    }
-                } else if (pair.getKey() == Heading.values()[2]) {
-                    List list = (List)(pair.getValue());
-                    for (Iterator iter = list.iterator(); iter.hasNext(); ) {
-                        Bullet b = (Bullet) iter.next();
-                        if (b.x - speed < 0) {
-                            iter.remove();
-                            timerIntervalAfterBoom.start();
-                            boom = new Boom(b.x, b.y, atlas);
-                            boom.setDelay(100);
-                            boomState = true;
-                            boomKind = 0;
-                        } else b.x -= 2 * speed;
-                        if (collision.BulletCollision(b, 3.2f * speed, 2)) {
-                            iter.remove();
-                            timerIntervalAfterBoom.start();
-                            boom = new Boom(b.x - 10, b.y + 10, atlas);
-                            boom.setDelay(100);
-                            boomState = true;
-                            boomKind = 0;
-                        } else if (collision.EnemyTankBulletCollision(b, 3.2f * speed, 2)) {
-                            iter.remove();
-                            timerIntervalAfterBoom.start();
-                            boom = new Boom(b.x - 10, b.y + 10, atlas);
-                            boom.setDelay(100);
-                            boomState = true;
-                            boomKind = 6;
-                        }
-                    }
-                } else if (pair.getKey() == Heading.values()[3]) {
-                    List list = (List)(pair.getValue());
-                    for (Iterator iter = list.iterator(); iter.hasNext(); ) {
-                        Bullet b = (Bullet) iter.next();
-                        if (b.y - speed > Game.HEIGHT) {
-                            iter.remove();
-                            timerIntervalAfterBoom.start();
-                            boom = new Boom(b.x, b.y, atlas);
-                            boom.setDelay(100);
-                            boomState = true;
-                            boomKind = 0;
-                        } else b.y += 2 * speed;
-                        if (collision.BulletCollision(b, speed, 1)) {
-                            iter.remove();
-                            timerIntervalAfterBoom.start();
-                            boom = new Boom(b.x, b.y + 25, atlas);
-                            boom.setDelay(100);
-                            boomState = true;
-                            boomKind = 0;
-                        } else if (collision.EnemyTankBulletCollision(b, speed, 1)) {
-                            iter.remove();
-                            timerIntervalAfterBoom.start();
-                            boom = new Boom(b.x, b.y + 25, atlas);
-                            boom.setDelay(100);
-                            boomState = true;
-                            boomKind = 6;
-                        }
-                    }
+            if (bullet.getHeading() == 0) {
+                if (bullet.y - speed < 0) {
+                    boom = new Boom(bullet.x, bullet.y, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                } else bullet.y -= 2 * speed;
+                if (collision.BulletCollision(bullet, 3.2f * speed, 0)) {
+                    boom = new Boom(bullet.x, bullet.y, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                } else if (collision.EnemyTankBulletCollision(bullet, 3.2f * speed, 0)) {
+                    boom = new Boom(bullet.x, bullet.y, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 6;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
                 }
-
+            } else if (bullet.getHeading() == 1) {
+                if (bullet.x + speed > Game.WIDTH) {
+                    boom = new Boom(bullet.x, bullet.y, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                } else bullet.x += 2 * speed;
+                if (collision.BulletCollision(bullet, speed, 3)) {
+                    boom = new Boom(bullet.x, bullet.y + 10, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                } else if (collision.EnemyTankBulletCollision(bullet, speed, 3)) {
+                    boom = new Boom(bullet.x, bullet.y + 10, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 6;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                }
+            } else if (bullet.getHeading() == 2) {
+                if (bullet.x - speed < 0) {
+                    boom = new Boom(bullet.x, bullet.y, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                } else bullet.x -= 2 * speed;
+                if (collision.BulletCollision(bullet, 3.2f * speed, 2)) {
+                    boom = new Boom(bullet.x - 10, bullet.y + 10, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                } else if (collision.EnemyTankBulletCollision(bullet, 3.2f * speed, 2)) {
+                    boom = new Boom(bullet.x - 10, bullet.y + 10, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 6;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                }
+            } else if (bullet.getHeading() == 3) {
+                if (bullet.y - speed > Game.HEIGHT) {
+                    boom = new Boom(bullet.x, bullet.y, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                } else bullet.y += 2 * speed;
+                if (collision.BulletCollision(bullet, speed, 1)) {
+                    boom = new Boom(bullet.x, bullet.y + 25, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 0;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                } else if (collision.EnemyTankBulletCollision(bullet, speed, 1)) {
+                    boom = new Boom(bullet.x, bullet.y + 25, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 6;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                }
             }
-            if (bulletListNorth.isEmpty() && bulletListWest.isEmpty() && bulletListEast.isEmpty() && bulletListSouth.isEmpty())
-                shotOccured = false;
         }
 
         x = newX;
@@ -311,13 +289,7 @@ public class Player extends Entity {
     public void render(Graphics2D g) {
         spriteMap.get(heading).render(g, x, y);
         if (shotOccured) {
-            Iterator it = bulletMap.entrySet().iterator();
-            while (it.hasNext()) {
-                HashMap.Entry pair = (HashMap.Entry) it.next();
-                List list = (List)(pair.getValue());
-                for (Object b : list)
-                    ((Bullet) (b)).render(g);
-            }
+            bullet.render(g);
         }
         if (boomState) {
             try {
@@ -327,6 +299,9 @@ public class Player extends Entity {
             }
         }
     }
+
+    @Override
+    public void updateSecondPlayer(Input input, Collision collision, SecondPlayer secondPlayer) {}
 
     public void setSpeed(int speed) {
         this.speed = speed;
