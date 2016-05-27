@@ -2,14 +2,17 @@ package Game;
 
 import Display.Display;
 import Game.Enemy.EnemyStrategy;
-import Game.Enemy.EnemyTank;
 import Game.Level.Level;
 import Game.Menu.Menu;
 import IO.Input;
 import utils.Time;
 import Graphics.TextureAtlas;
 
+import java.applet.Applet;
+import java.applet.AudioClip;
 import java.awt.*;
+import java.io.File;
+import java.net.MalformedURLException;
 
 public class Game implements Runnable {
 
@@ -38,6 +41,10 @@ public class Game implements Runnable {
     private static int menuChoice;
     private static boolean choiced;
     private EnemyStrategy enemyStrategy;
+    private AudioClip constSound;
+    private static boolean constSoundIsPlaying;
+    private static boolean permanent;
+    private File constSoundFile = new File("CattleBity\\res\\Sounds\\const.wav");
 
 
     public Game() {
@@ -53,13 +60,19 @@ public class Game implements Runnable {
         secondPlayer = new SecondPlayer(130, 323, 2, 2, atlas);
         level = new Level(atlas);
         collision = new Collision(level.getTilesCoords(), level);
-        enemyStrategy = new EnemyStrategy(atlas, collision, player, secondPlayer);
+        enemyStrategy = new EnemyStrategy(atlas, collision, player, secondPlayer, level);
         collision.setEnemyStrategy(enemyStrategy);
         enemyStrategy.addEnemyTank(60, 60);
-        enemyStrategy.addEnemyTank(500, 40);
-        enemyStrategy.addEnemyTank(180, 60);
+        enemyStrategy.addEnemyTank(500, 30);
+        enemyStrategy.addEnemyTank(180, 35);
         enemyStrategy.addEnemyTank(270, 60);
         choiced = false;
+        try {
+            constSound = Applet.newAudioClip(constSoundFile.toURL());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        permanent = true;
 
     }
 
@@ -96,11 +109,19 @@ public class Game implements Runnable {
                 player.update(input, collision, player);
                 enemyStrategy.update();
                 level.update();
+//                if (!constSoundIsPlaying && permanent) {
+//                    constSound.loop();
+//                    constSoundIsPlaying = true;
+//                }
             } else if (menuChoice == 1) {
                 player.update(input, collision, player);
                 secondPlayer.updateSecondPlayer(input, collision, secondPlayer);
                 enemyStrategy.update();
                 level.update();
+//                if (!constSoundIsPlaying && permanent) {
+//                    constSound.loop();
+//                    constSoundIsPlaying = true;
+//                }
             }
         }
     }
@@ -125,7 +146,6 @@ public class Game implements Runnable {
                 level.renderGrass(graphics);
             }
         }
-
         Display.swapBuffers();
     }
 
@@ -191,5 +211,14 @@ public class Game implements Runnable {
 
     public static void setMenuChoice(int choice) {
         menuChoice = choice;
+    }
+
+    public static void setConstSoundIsPlaying(boolean state) {
+        constSoundIsPlaying = state;
+        permanent = state;
+    }
+
+    public static void setPermanent(boolean state) {
+        permanent = state;
     }
 }

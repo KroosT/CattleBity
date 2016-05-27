@@ -57,9 +57,11 @@ public class Player extends Entity {
     private int currFrame;
     private int boomKind;
     private boolean interval;
+    private boolean movePlaying;
     private Timer timer;
     private AudioClip shot;
     private AudioClip move;
+    private boolean destroyed;
     private File moveFile = new File("CattleBity\\res\\Sounds\\move.wav");
     private File shotFile = new File("CattleBity\\res\\Sounds\\shot.wav");
 
@@ -77,6 +79,7 @@ public class Player extends Entity {
             Sprite sprite = new Sprite(sheet, scale);
             spriteMap.put(h, sprite);
         }
+        destroyed = false;
         interval = true;
         timer = new Timer(250, new ActionListener() {
             @Override
@@ -103,25 +106,44 @@ public class Player extends Entity {
             heading = NORTH;
             if (collision.TankCollision(player, 3.2f * speed, 0) || collision.EnemyTankPlayerTankCollision(player, speed, 0))
                 newY += speed;
-            //move.play();
+//            if (!movePlaying) {
+//                Game.setConstSoundIsPlaying(false);
+//                move.loop();
+//                movePlaying = true;
+//            }
         } else if (input.getKey(KeyEvent.VK_DOWN)) {
             newY += speed;
             heading = SOUTH;
             if (collision.TankCollision(player, speed, 1) || collision.EnemyTankPlayerTankCollision(player, speed, 1))
                 newY -= speed;
-            //move.play();
+//            if (!movePlaying) {
+//                Game.setConstSoundIsPlaying(false);
+//                move.loop();
+//                movePlaying = true;
+//            }
         } else if (input.getKey(KeyEvent.VK_LEFT)) {
             newX -= speed;
             heading = WEST;
             if (collision.TankCollision(player, 3.2f * speed, 2) || collision.EnemyTankPlayerTankCollision(player, speed, 2))
                 newX += speed;
-            //move.play();
+//            if (!movePlaying) {
+//                Game.setConstSoundIsPlaying(false);
+//                move.loop();
+//                movePlaying = true;
+//            }
         } else if (input.getKey(KeyEvent.VK_RIGHT)) {
             newX += speed;
             heading = EAST;
             if (collision.TankCollision(player, speed, 3) || collision.EnemyTankPlayerTankCollision(player, speed, 3))
                 newX -= speed;
-            //move.play();
+//            if (!movePlaying) {
+//                Game.setConstSoundIsPlaying(false);
+//                move.loop();
+//                movePlaying = true;
+//            }
+        } else {
+//            move.stop();
+//            movePlaying = false;
         }
 
         if (input.getKey(KeyEvent.VK_SLASH)) {
@@ -294,7 +316,8 @@ public class Player extends Entity {
 
     @Override
     public void render(Graphics2D g) {
-        spriteMap.get(heading).render(g, x, y);
+        if (!destroyed)
+            spriteMap.get(heading).render(g, x, y);
         if (shotOccured) {
             bullet.render(g);
         }
@@ -331,4 +354,8 @@ public class Player extends Entity {
         }
     }
 
+    public void destroy() {
+        destroyed = true;
+
+    }
 }

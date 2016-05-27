@@ -312,19 +312,19 @@ public class Collision {
         Rectangle bulletRect;
         switch (direction) {
             case 0:
-                bulletRect = new Rectangle((int)bullet.x, (int)(bullet.y - speed), 30, 30);
+                bulletRect = new Rectangle((int)bullet.x, (int)(bullet.y - speed), 10, 10);
                 break;
             case 1:
-                bulletRect = new Rectangle((int)bullet.x, (int)(bullet.y + speed), 30, 30);
+                bulletRect = new Rectangle((int)bullet.x, (int)(bullet.y + speed), 10, 10);
                 break;
             case 2:
-                bulletRect = new Rectangle((int)(bullet.x - speed), (int)bullet.y, 30, 30);
+                bulletRect = new Rectangle((int)(bullet.x - speed), (int)bullet.y, 10, 10);
                 break;
             case 3:
-                bulletRect = new Rectangle((int)(bullet.x + speed), (int)bullet.y, 30, 30);
+                bulletRect = new Rectangle((int)(bullet.x + speed), (int)bullet.y, 10, 10);
                 break;
             default:
-                bulletRect = new Rectangle((int)bullet.x, (int)bullet.y, 30, 30);
+                bulletRect = new Rectangle((int)bullet.x, (int)bullet.y, 10, 10);
                 break;
         }
 
@@ -413,6 +413,54 @@ public class Collision {
             if (enemyTankRect.intersects(eagleRect))
                 col = true;
         }
+        return col;
+    }
+
+    public boolean PlayerTankBulletCollision(Player player, Bullet bullet, float speed, int direction) {
+        boolean col = false;
+        Rectangle bulletRect;
+        switch (direction) {
+            case 0:
+                bulletRect = new Rectangle((int)bullet.x, (int)(bullet.y - speed), 10, 10);
+                break;
+            case 1:
+                bulletRect = new Rectangle((int)bullet.x, (int)(bullet.y + speed), 10, 10);
+                break;
+            case 2:
+                bulletRect = new Rectangle((int)(bullet.x - speed), (int)bullet.y, 10, 10);
+                break;
+            case 3:
+                bulletRect = new Rectangle((int)(bullet.x + speed), (int)bullet.y, 10, 10);
+                break;
+            default:
+                bulletRect = new Rectangle((int)bullet.x, (int)bullet.y, 10, 10);
+                break;
+        }
+
+        Rectangle playerRect;
+        switch (direction) {
+            case 0:
+                playerRect = new Rectangle((int)player.x, (int)(player.y - 4 * speed), 30, 30);
+                break;
+            case 1:
+                playerRect = new Rectangle((int)player.x, (int)(player.y + speed), 30, 30);
+                break;
+            case 2:
+                playerRect = new Rectangle((int)(player.x - speed), (int)player.y, 30, 30);
+                break;
+            case 3:
+                playerRect = new Rectangle((int)(player.x + speed), (int)player.y, 30, 30);
+                break;
+            default:
+                playerRect = new Rectangle((int)player.x, (int)player.y, 30, 30);
+                break;
+        }
+
+        if (playerRect.intersects(bulletRect)) {
+            col = true;
+            player.destroy();
+        }
+
         return col;
     }
 

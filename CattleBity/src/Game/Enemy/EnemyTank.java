@@ -21,16 +21,6 @@ public class EnemyTank extends Entity {
 
     private static final int SPRITE_SCALE = 16;
 
-    public enum Direction {
-        NORTH,
-        EAST,
-        WEST,
-        SOUTH;
-
-        Direction() {
-        }
-    }
-
     public enum EnemyTankType {
 
         GREY_NORTH(128,2,14,13),
@@ -60,6 +50,7 @@ public class EnemyTank extends Entity {
         }
     }
 
+    private Player player;
     private TextureAtlas atlas;
     private Map<EnemyTankType, Sprite2> enemyTankMap;
     private EnemyTankType enemyTankType;
@@ -74,9 +65,10 @@ public class EnemyTank extends Entity {
     private Timer timer;
     private boolean shotOccured;
 
-    public EnemyTank(float x, float y, float scale, float speed, TextureAtlas atlas){
+    public EnemyTank(float x, float y, float scale, float speed, TextureAtlas atlas, Player player){
         super(EntityType.EnemyTank, x, y);
 
+        this.player = player;
         this.atlas = atlas;
         this.scale = scale;
         this.speed = speed;
@@ -132,6 +124,16 @@ public class EnemyTank extends Entity {
                     timer.start();
                     shotOccured = false;
                 }
+                else if (collision.PlayerTankBulletCollision(player, bullet, speed, 0)) {
+                    boom = new Boom(bullet.getX(), bullet.getY() + 10, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 6;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                }
             } else if (bullet.getHeading() == 1) {
                 if (bullet.getX() + speed > Game.WIDTH) {
                     boom = new Boom(bullet.getX(), bullet.getY(), atlas);
@@ -152,6 +154,16 @@ public class EnemyTank extends Entity {
                     interval = false;
                     timer.start();
                     shotOccured = false;
+                }
+                else if (collision.PlayerTankBulletCollision(player, bullet, speed, 3)) {
+                    boom = new Boom(bullet.getX(), bullet.getY() + 10, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 6;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
                 }
             } else if (bullet.getHeading() == 2) {
                 if (bullet.getX() - speed < 0) {
@@ -174,6 +186,16 @@ public class EnemyTank extends Entity {
                     timer.start();
                     shotOccured = false;
                 }
+                else if (collision.PlayerTankBulletCollision(player, bullet, speed, 2)) {
+                    boom = new Boom(bullet.getX(), bullet.getY() + 10, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 6;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
+                }
             } else if (bullet.getHeading() == 3) {
                 if (bullet.getY() - speed > Game.HEIGHT) {
                     boom = new Boom(bullet.getX(), bullet.getY(), atlas);
@@ -194,6 +216,16 @@ public class EnemyTank extends Entity {
                     interval = false;
                     timer.start();
                     shotOccured = false;
+                }
+                else if (collision.PlayerTankBulletCollision(player, bullet, speed, 1)) {
+                    boom = new Boom(bullet.getX(), bullet.getY() + 10, atlas);
+                    boom.setDelay(100);
+                    boomState = true;
+                    boomKind = 6;
+                    bullet = null;
+                    shotOccured = false;
+                    interval = false;
+                    timer.start();
                 }
             }
         }
@@ -246,7 +278,7 @@ public class EnemyTank extends Entity {
     }
 
     public void changeDirection() {
-        Random random = new Random();
+        Random random = new Random(System.nanoTime());
         if (enemyTankType == GREY_NORTH || enemyTankType == GREY_SOUTH || enemyTankType == GREY_WEST || enemyTankType == GREY_EAST)
             enemyTankType = fromNumericGrey(random.nextInt(4));
         else if (enemyTankType == RED_NORTH || enemyTankType == RED_SOUTH || enemyTankType == RED_WEST || enemyTankType == RED_EAST)
@@ -263,6 +295,43 @@ public class EnemyTank extends Entity {
         } else if (enemyTankType == GREEN_WEST || enemyTankType == GREY_WEST || enemyTankType == RED_WEST) {
             return 2;
         } else return 1;
+    }
+
+    public void setDirection(int direction) {
+        switch (direction) {
+            case 0:
+                if (enemyTankType == GREY_NORTH || enemyTankType == GREY_SOUTH || enemyTankType == GREY_WEST || enemyTankType == GREY_EAST)
+                    enemyTankType = fromNumericGrey(0);
+                else if (enemyTankType == RED_NORTH || enemyTankType == RED_SOUTH || enemyTankType == RED_WEST || enemyTankType == RED_EAST)
+                    enemyTankType = fromNumericRed(0);
+                else
+                    enemyTankType = fromNumericGreen(0);
+                break;
+            case 2:
+                if (enemyTankType == GREY_NORTH || enemyTankType == GREY_SOUTH || enemyTankType == GREY_WEST || enemyTankType == GREY_EAST)
+                    enemyTankType = fromNumericGrey(2);
+                else if (enemyTankType == RED_NORTH || enemyTankType == RED_SOUTH || enemyTankType == RED_WEST || enemyTankType == RED_EAST)
+                    enemyTankType = fromNumericRed(2);
+                else
+                    enemyTankType = fromNumericGreen(2);
+                break;
+            case 3:
+                if (enemyTankType == GREY_NORTH || enemyTankType == GREY_SOUTH || enemyTankType == GREY_WEST || enemyTankType == GREY_EAST)
+                    enemyTankType = fromNumericGrey(3);
+                else if (enemyTankType == RED_NORTH || enemyTankType == RED_SOUTH || enemyTankType == RED_WEST || enemyTankType == RED_EAST)
+                    enemyTankType = fromNumericRed(3);
+                else
+                    enemyTankType = fromNumericGreen(3);
+                break;
+            case 1:
+                if (enemyTankType == GREY_NORTH || enemyTankType == GREY_SOUTH || enemyTankType == GREY_WEST || enemyTankType == GREY_EAST)
+                    enemyTankType = fromNumericGrey(1);
+                else if (enemyTankType == RED_NORTH || enemyTankType == RED_SOUTH || enemyTankType == RED_WEST || enemyTankType == RED_EAST)
+                    enemyTankType = fromNumericRed(1);
+                else
+                    enemyTankType = fromNumericGreen(1);
+                break;
+        }
     }
 
     @Override
