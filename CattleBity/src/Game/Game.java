@@ -37,6 +37,7 @@ public class Game implements Runnable {
     private Player player;
     private SecondPlayer secondPlayer;
     private Level level;
+    private GameOver gameOver;
     private Collision collision;
     private static int menuChoice;
     private static boolean choiced;
@@ -62,10 +63,11 @@ public class Game implements Runnable {
         collision = new Collision(level.getTilesCoords(), level);
         enemyStrategy = new EnemyStrategy(atlas, collision, player, secondPlayer, level);
         collision.setEnemyStrategy(enemyStrategy);
-        enemyStrategy.addEnemyTank(60, 60);
-        enemyStrategy.addEnemyTank(500, 30);
-        enemyStrategy.addEnemyTank(180, 35);
-        enemyStrategy.addEnemyTank(270, 60);
+        gameOver = new GameOver(atlas);
+//        enemyStrategy.addEnemyTank(60, 60);
+//        enemyStrategy.addEnemyTank(500, 30);
+//        enemyStrategy.addEnemyTank(180, 35);
+//        enemyStrategy.addEnemyTank(270, 60);
         choiced = false;
         try {
             constSound = Applet.newAudioClip(constSoundFile.toURL());
@@ -105,23 +107,27 @@ public class Game implements Runnable {
             menu.update(input, collision, player);
         }
         else {
-            if (menuChoice == 0) {
-                player.update(input, collision, player);
-                enemyStrategy.update();
-                level.update();
+            if (gameOver.getGameOver()) {
+                level.setTileMapPlain();
+            } else {
+                if (menuChoice == 0) {
+                    player.update(input, collision, player);
+                    enemyStrategy.update();
+                    level.update(gameOver);
 //                if (!constSoundIsPlaying && permanent) {
 //                    constSound.loop();
 //                    constSoundIsPlaying = true;
 //                }
-            } else if (menuChoice == 1) {
-                player.update(input, collision, player);
-                secondPlayer.updateSecondPlayer(input, collision, secondPlayer);
-                enemyStrategy.update();
-                level.update();
+                } else if (menuChoice == 1) {
+                    player.update(input, collision, player);
+                    secondPlayer.updateSecondPlayer(input, collision, secondPlayer);
+                    enemyStrategy.update();
+                    level.update(gameOver);
 //                if (!constSoundIsPlaying && permanent) {
 //                    constSound.loop();
 //                    constSoundIsPlaying = true;
 //                }
+                }
             }
         }
     }
@@ -133,17 +139,22 @@ public class Game implements Runnable {
             player.render(graphics);
         }
         else {
-            if (menuChoice == 0) {
+            if (gameOver.getGameOver()) {
                 level.render(graphics);
-                player.render(graphics);
-                enemyStrategy.render(graphics);
-                level.renderGrass(graphics);
-            } else if (menuChoice == 1) {
-                level.render(graphics);
-                player.render(graphics);
-                secondPlayer.render(graphics);
-                enemyStrategy.render(graphics);
-                level.renderGrass(graphics);
+                gameOver.render(graphics);
+            } else {
+                if (menuChoice == 0) {
+                    level.render(graphics);
+                    player.render(graphics);
+                    enemyStrategy.render(graphics);
+                    level.renderGrass(graphics);
+                } else if (menuChoice == 1) {
+                    level.render(graphics);
+                    player.render(graphics);
+                    secondPlayer.render(graphics);
+                    enemyStrategy.render(graphics);
+                    level.renderGrass(graphics);
+                }
             }
         }
         Display.swapBuffers();

@@ -349,13 +349,13 @@ public class Collision {
                 enemyTankRect = new Rectangle((int)enemyTank.x, (int)(enemyTank.y - 4 * speed), 30, 30);
                 break;
             case 1:
-                enemyTankRect = new Rectangle((int)enemyTank.x, (int)(enemyTank.y + speed), 30, 30);
+                enemyTankRect = new Rectangle((int)enemyTank.x, (int)(enemyTank.y + 4 * speed), 30, 30);
                 break;
             case 2:
-                enemyTankRect = new Rectangle((int)(enemyTank.x - speed), (int)enemyTank.y, 30, 30);
+                enemyTankRect = new Rectangle((int)(enemyTank.x - 4 * speed), (int)enemyTank.y, 30, 30);
                 break;
             case 3:
-                enemyTankRect = new Rectangle((int)(enemyTank.x + speed), (int)enemyTank.y, 30, 30);
+                enemyTankRect = new Rectangle((int)(enemyTank.x + 4 * speed), (int)enemyTank.y, 30, 30);
                 break;
             default:
                 enemyTankRect = new Rectangle((int)enemyTank.x, (int)enemyTank.y, 30, 30);

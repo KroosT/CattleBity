@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.List;
 import Graphics.TextureAtlas;
 import utils.Utils;
+import Game.GameOver;
 
 public class Level {
 
@@ -28,8 +29,10 @@ public class Level {
     private List<Point> metalCoords;
     private List<Point> infoCoords;
     private List<Point> eagleCoords;
+    private boolean winState;
 
     public Level(TextureAtlas atlas) {
+        winState = false;
         tiles = new HashMap<>();
         tiles.put(TileType.BRICK, new Tile(atlas.Cut(32 * TILE_SCALE, 0, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE,
                 TileType.BRICK));
@@ -45,6 +48,8 @@ public class Level {
         tiles.put(TileType.EMPTY, new Tile(atlas.Cut(36 * TILE_SCALE, 6 * TILE_SCALE, TILE_SCALE, TILE_SCALE),
                 TILE_IN_GAME_SCALE, TileType.EMPTY));
         tiles.put(TileType.INFO, new Tile(atlas.Cut(368, 214, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE, TileType.INFO));
+        tiles.put(TileType.STAGE, new Tile(atlas.Cut(328, 176, 5 * TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE, TileType.STAGE));
+        tiles.put(TileType.ONE, new Tile(atlas.Cut(336, 184, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE, TileType.ONE));
         tileMap = Utils.LevelLoader("CattleBity\\res\\level.lvl");
         grassCoords = new ArrayList<>();
         tilesCoords = new ArrayList<>();
@@ -57,9 +62,8 @@ public class Level {
         for (int i = 0; i < tileMap.length; i++) {
             for (int j = 0; j < tileMap[i].length; j++) {
                 Tile tile = tiles.get(TileType.fromNumeric(tileMap[i][j]));
-                if (tile.getType() == TileType.EAGLE) {
+                if (tile.getType() == TileType.EAGLE)
                     eagleCoords.add(new Point(j * SCALED_TILE_SIZE, i * SCALED_TILE_SIZE));
-                }
                 else if (tile.getType() == TileType.GRASS)
                     grassCoords.add(new Point(j * SCALED_TILE_SIZE, i * SCALED_TILE_SIZE));
                 else if (tile.getType() == TileType.WATER)
@@ -118,8 +122,26 @@ public class Level {
         eagleCoords.remove(p);
     }
 
-    public void update() {
+    public boolean getWinState() {
+        return winState;
+    }
 
+    public void setWinState(boolean winState) {
+        this.winState = winState;
+    }
+
+    public void changeLevel() {
+
+    }
+
+    public void setTileMapPlain() {
+        tileMap = Utils.LevelLoader("CattleBity\\res\\plain.lvl");
+    }
+
+    public void update(GameOver gameOver) {
+        if (eagleCoords.size() == 0) {
+            gameOver.setGameOver(true);
+        }
     }
 
     public void render(Graphics2D g) {

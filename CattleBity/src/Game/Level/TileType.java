@@ -9,7 +9,17 @@ public enum TileType {
     GRASS(4),
     METAL(5),
     EAGLE(6),
-    INFO(7);
+    INFO(7),
+    STAGE(8),
+    ONE(9),
+    TWO(10),
+    THREE(11),
+    FOUR(12),
+    FIVE(13),
+    SIX(14),
+    SEVEN(15),
+    EIGHT(16),
+    NINE(17);
 
 
     private int n;
@@ -38,6 +48,26 @@ public enum TileType {
                 return EAGLE;
             case 7:
                 return INFO;
+            case 8:
+                return STAGE;
+            case 9:
+                return ONE;
+            case 10:
+                return TWO;
+            case 11:
+                return THREE;
+            case 12:
+                return FOUR;
+            case 13:
+                return FIVE;
+            case 14:
+                return SIX;
+            case 15:
+                return SEVEN;
+            case 16:
+                return EIGHT;
+            case 17:
+                return NINE;
             default:
                 return EMPTY;
         }
