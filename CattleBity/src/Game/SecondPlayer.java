@@ -84,25 +84,29 @@ public class SecondPlayer extends Entity {
         float newY = y;
 
         if (input.getKey(KeyEvent.VK_W)) {
-            newY -= speed;
             heading = NORTH;
-            if (collision.SecondPlayerCollision(secondPlayer, 3.2f * speed, 0) || collision.EnemyTankSecondPlayerTankCollision(secondPlayer, speed, 0))
-                newY += speed;
-        } else if (input.getKey(KeyEvent.VK_S)) {
-            newY += speed;
-            heading = SOUTH;
-            if (collision.SecondPlayerCollision(secondPlayer, speed, 1) || collision.EnemyTankSecondPlayerTankCollision(secondPlayer, speed, 1))
+            if (collision.SecondPlayerCollision(secondPlayer, speed, 0) || collision.EnemyTankSecondPlayerTankCollision(secondPlayer, speed, 0)) {
+
+            } else
                 newY -= speed;
+        } else if (input.getKey(KeyEvent.VK_S)) {
+            heading = SOUTH;
+            if (collision.SecondPlayerCollision(secondPlayer, speed, 1) || collision.EnemyTankSecondPlayerTankCollision(secondPlayer, speed, 1)) {
+
+            }
+                newY += speed;
         } else if (input.getKey(KeyEvent.VK_A)) {
-            newX -= speed;
             heading = WEST;
-            if (collision.SecondPlayerCollision(secondPlayer, 3.2f * speed, 2) || collision.EnemyTankSecondPlayerTankCollision(secondPlayer, speed, 2))
-                newX += speed;
-        } else if (input.getKey(KeyEvent.VK_D)) {
-            newX += speed;
-            heading = EAST;
-            if (collision.SecondPlayerCollision(secondPlayer, speed, 3) || collision.EnemyTankSecondPlayerTankCollision(secondPlayer, speed, 3))
+            if (collision.SecondPlayerCollision(secondPlayer, speed, 2) || collision.EnemyTankSecondPlayerTankCollision(secondPlayer, speed, 2)){
+
+            } else
                 newX -= speed;
+        } else if (input.getKey(KeyEvent.VK_D)) {
+            heading = EAST;
+            if (collision.SecondPlayerCollision(secondPlayer, speed, 3) || collision.EnemyTankSecondPlayerTankCollision(secondPlayer, speed, 3)) {
+
+            } else
+                newX += speed;
         }
 
         if (input.getKey(KeyEvent.VK_SPACE)) {

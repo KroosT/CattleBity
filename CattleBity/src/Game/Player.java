@@ -102,48 +102,31 @@ public class Player extends Entity {
         float newY = y;
 
         if (input.getKey(KeyEvent.VK_UP)) {
-            newY -= speed;
+
             heading = NORTH;
-            if (collision.TankCollision(player, 3.2f * speed, 0) || collision.EnemyTankPlayerTankCollision(player, speed, 0))
-                newY += speed;
-//            if (!movePlaying) {
-//                Game.setConstSoundIsPlaying(false);
-//                move.loop();
-//                movePlaying = true;
-//            }
-        } else if (input.getKey(KeyEvent.VK_DOWN)) {
-            newY += speed;
-            heading = SOUTH;
-            if (collision.TankCollision(player, speed, 1) || collision.EnemyTankPlayerTankCollision(player, speed, 1))
+            if (collision.TankCollision(player, speed, 0) || collision.EnemyTankPlayerTankCollision(player, speed, 0)) {
+
+            } else
                 newY -= speed;
-//            if (!movePlaying) {
-//                Game.setConstSoundIsPlaying(false);
-//                move.loop();
-//                movePlaying = true;
-//            }
+        } else if (input.getKey(KeyEvent.VK_DOWN)) {
+            heading = SOUTH;
+            if (collision.TankCollision(player, speed, 1) || collision.EnemyTankPlayerTankCollision(player, speed, 1)) {
+
+            } else
+                newY += speed;
         } else if (input.getKey(KeyEvent.VK_LEFT)) {
-            newX -= speed;
+
             heading = WEST;
-            if (collision.TankCollision(player, 3.2f * speed, 2) || collision.EnemyTankPlayerTankCollision(player, speed, 2))
-                newX += speed;
-//            if (!movePlaying) {
-//                Game.setConstSoundIsPlaying(false);
-//                move.loop();
-//                movePlaying = true;
-//            }
-        } else if (input.getKey(KeyEvent.VK_RIGHT)) {
-            newX += speed;
-            heading = EAST;
-            if (collision.TankCollision(player, speed, 3) || collision.EnemyTankPlayerTankCollision(player, speed, 3))
+            if (collision.TankCollision(player, speed, 2) || collision.EnemyTankPlayerTankCollision(player, speed, 2)) {
+
+            } else
                 newX -= speed;
-//            if (!movePlaying) {
-//                Game.setConstSoundIsPlaying(false);
-//                move.loop();
-//                movePlaying = true;
-//            }
-        } else {
-//            move.stop();
-//            movePlaying = false;
+        } else if (input.getKey(KeyEvent.VK_RIGHT)) {
+            heading = EAST;
+            if (collision.TankCollision(player, speed, 3) || collision.EnemyTankPlayerTankCollision(player, speed, 3)) {
+
+            } else
+                newX += speed;
         }
 
         if (input.getKey(KeyEvent.VK_SLASH)) {
@@ -356,6 +339,5 @@ public class Player extends Entity {
 
     public void destroy() {
         destroyed = true;
-
     }
 }

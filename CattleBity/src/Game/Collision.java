@@ -5,6 +5,7 @@ import Game.Enemy.EnemyTank;
 import Game.Level.Level;
 
 import java.awt.*;
+import java.util.ArrayList;
 import  java.util.List;
 
 public class Collision {
@@ -42,13 +43,13 @@ public class Collision {
         Rectangle playerRect;
         switch (var) {
             case 0:
-                playerRect = new Rectangle((int)player.x, (int)(player.y - speed), 30, 30);
+                playerRect = new Rectangle((int)player.x, (int)(player.y - 6 * speed), 30, 30);
                 break;
             case 1:
                 playerRect = new Rectangle((int)player.x, (int)(player.y + speed), 30, 30);
                 break;
             case 2:
-                playerRect = new Rectangle((int)(player.x - speed), (int)player.y, 30, 30);
+                playerRect = new Rectangle((int)(player.x - 6 * speed), (int)player.y, 30, 30);
                 break;
             case 3:
                 playerRect = new Rectangle((int)(player.x + speed), (int)player.y, 30, 30);
@@ -118,13 +119,13 @@ public class Collision {
         Rectangle playerRect;
         switch (var) {
             case 0:
-                playerRect = new Rectangle((int)secondPlayer.x, (int)(secondPlayer.y - speed), 30, 30);
+                playerRect = new Rectangle((int)secondPlayer.x, (int)(secondPlayer.y - 6 * speed), 30, 30);
                 break;
             case 1:
                 playerRect = new Rectangle((int)secondPlayer.x, (int)(secondPlayer.y + speed), 30, 30);
                 break;
             case 2:
-                playerRect = new Rectangle((int)(secondPlayer.x - speed), (int)secondPlayer.y, 30, 30);
+                playerRect = new Rectangle((int)(secondPlayer.x - 6 * speed), (int)secondPlayer.y, 30, 30);
                 break;
             case 3:
                 playerRect = new Rectangle((int)(secondPlayer.x + speed), (int)secondPlayer.y, 30, 30);
@@ -245,21 +246,53 @@ public class Collision {
         return col;
     }
 
+    public boolean EnemyTankEnemyTankCollision() {
+        boolean col = false;
+        Rectangle rect;
+        Rectangle tRect;
+        List<EnemyTank> temp = enemyTankList;
+        for (EnemyTank e : enemyTankList) {
+            temp.remove(e);
+
+            switch (e.getDirection()) {
+                case 0:
+                    rect = new Rectangle((int)e.x, (int)(e.y - 6 * e.getSpeed()), 30, 30);
+                    break;
+                case 1:
+                    rect = new Rectangle((int)e.x, (int)(e.y + e.getSpeed()), 30, 30);
+                    break;
+                case 2:
+                    rect = new Rectangle((int)(e.x - 6 * e.getSpeed()), (int)e.y, 30, 30);
+                    break;
+                case 3:
+                    rect = new Rectangle((int)(e.x + e.getSpeed()), (int)e.y, 30, 30);
+                    break;
+                default:
+                    rect = new Rectangle((int)e.x, (int)e.y, 30, 30);
+                    break;
+            }
+
+            temp = enemyTankList;
+        }
+        return col;
+    }
+
     public boolean EnemyTankPlayerTankCollision(Player player, float speed, int direction) {
         boolean col = false;
+        List list = new ArrayList<>();
         Rectangle playerRect;
         switch (direction) {
             case 0:
-                playerRect = new Rectangle((int)player.x, (int)(player.y - speed), 30, 30);
+                playerRect = new Rectangle((int)player.x, (int)(player.y - 12 * speed), 30, 30);
                 break;
             case 1:
-                playerRect = new Rectangle((int)player.x, (int)(player.y + speed), 30, 30);
+                playerRect = new Rectangle((int)player.x, (int)(player.y + 2 * speed), 30, 30);
                 break;
             case 2:
-                playerRect = new Rectangle((int)(player.x - speed), (int)player.y, 30, 30);
+                playerRect = new Rectangle((int)(player.x - 12 * speed), (int)player.y, 30, 30);
                 break;
             case 3:
-                playerRect = new Rectangle((int)(player.x + speed), (int)player.y, 30, 30);
+                playerRect = new Rectangle((int)(player.x + 2 * speed), (int)player.y, 30, 30);
                 break;
             default:
                 playerRect = new Rectangle((int)player.x, (int)player.y, 30, 30);
@@ -267,12 +300,31 @@ public class Collision {
         }
 
         for (EnemyTank t : enemyTankList) {
-            Rectangle tRect = new Rectangle((int)t.x, (int)t.y, 30, 30);
+            Rectangle tRect;
+            switch (t.getDirection()){
+                case 0:
+                    tRect = new Rectangle((int)t.x, (int)(t.y - 12 * speed), 30, 30);
+                    break;
+                case 1:
+                    tRect = new Rectangle((int)t.x, (int)(t.y + 2 * speed), 30, 30);
+                    break;
+                case 2:
+                    tRect = new Rectangle((int)(t.x - 12 * speed), (int)t.y, 30, 30);
+                    break;
+                case 3:
+                    tRect = new Rectangle((int)(t.x + 2 * speed), (int)t.y, 30, 30);
+                    break;
+                default:
+                    tRect = new Rectangle((int)t.x, (int)t.y, 30, 30);
+                    break;
+            }
             if (playerRect.intersects(tRect)) {
-                col = true;
+                list.add(true);
             }
         }
-
+        if (list.contains(true)) {
+            col = true;
+        }
         return col;
     }
 
@@ -281,16 +333,16 @@ public class Collision {
         Rectangle playerRect;
         switch (direction) {
             case 0:
-                playerRect = new Rectangle((int)secondPlayer.x, (int)(secondPlayer.y - 2 * speed), 30, 30);
+                playerRect = new Rectangle((int)secondPlayer.x, (int)(secondPlayer.y - 6 * speed), 30, 30);
                 break;
             case 1:
-                playerRect = new Rectangle((int)secondPlayer.x, (int)(secondPlayer.y + 2 * speed), 30, 30);
+                playerRect = new Rectangle((int)secondPlayer.x, (int)(secondPlayer.y + speed), 30, 30);
                 break;
             case 2:
-                playerRect = new Rectangle((int)(secondPlayer.x - 2 * speed), (int)secondPlayer.y, 30, 30);
+                playerRect = new Rectangle((int)(secondPlayer.x - 6 * speed), (int)secondPlayer.y, 30, 30);
                 break;
             case 3:
-                playerRect = new Rectangle((int)(secondPlayer.x + 2 * speed), (int)secondPlayer.y, 30, 30);
+                playerRect = new Rectangle((int)(secondPlayer.x + speed), (int)secondPlayer.y, 30, 30);
                 break;
             default:
                 playerRect = new Rectangle((int)secondPlayer.x, (int)secondPlayer.y, 30, 30);
@@ -346,16 +398,16 @@ public class Collision {
         Rectangle enemyTankRect;
         switch (direction) {
             case 0:
-                enemyTankRect = new Rectangle((int)enemyTank.x, (int)(enemyTank.y - 4 * speed), 30, 30);
+                enemyTankRect = new Rectangle((int)enemyTank.x, (int)(enemyTank.y - 6 * speed), 30, 30);
                 break;
             case 1:
-                enemyTankRect = new Rectangle((int)enemyTank.x, (int)(enemyTank.y + 4 * speed), 30, 30);
+                enemyTankRect = new Rectangle((int)enemyTank.x, (int)(enemyTank.y + speed), 30, 30);
                 break;
             case 2:
-                enemyTankRect = new Rectangle((int)(enemyTank.x - 4 * speed), (int)enemyTank.y, 30, 30);
+                enemyTankRect = new Rectangle((int)(enemyTank.x - 6 * speed), (int)enemyTank.y, 30, 30);
                 break;
             case 3:
-                enemyTankRect = new Rectangle((int)(enemyTank.x + 4 * speed), (int)enemyTank.y, 30, 30);
+                enemyTankRect = new Rectangle((int)(enemyTank.x + speed), (int)enemyTank.y, 30, 30);
                 break;
             default:
                 enemyTankRect = new Rectangle((int)enemyTank.x, (int)enemyTank.y, 30, 30);

@@ -1,13 +1,15 @@
 package Game.Level;
 
-import Game.Game;
-
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import Graphics.TextureAtlas;
+import javax.swing.Timer;
 import utils.Utils;
 import Game.GameOver;
 
@@ -17,8 +19,6 @@ public class Level {
     private static final int EAGLE_SCALE = 16;
     private static final int TILE_IN_GAME_SCALE = 2;
     private static final int SCALED_TILE_SIZE = TILE_IN_GAME_SCALE * TILE_SCALE;
-    public static final int TILES_IN_WIDTH = Game.WIDTH / SCALED_TILE_SIZE;
-    public static final int TILES_IN_HEIGHT = Game.HEIGHT / SCALED_TILE_SIZE;
     private Integer[][] tileMap;
     private Map<TileType, Tile> tiles;
     private List<Point> grassCoords;
@@ -29,9 +29,16 @@ public class Level {
     private List<Point> metalCoords;
     private List<Point> infoCoords;
     private List<Point> eagleCoords;
+    private BufferedImage tanksLeft;
+    private List<Point> tanksLeftCoords;
     private boolean winState;
+    private GameOver gameOver;
+    private int stage;
+    private Timer timerChangeStage;
 
-    public Level(TextureAtlas atlas) {
+    public Level(TextureAtlas atlas, GameOver gameOver) {
+        this.gameOver = gameOver;
+        this.stage = 9;
         winState = false;
         tiles = new HashMap<>();
         tiles.put(TileType.BRICK, new Tile(atlas.Cut(32 * TILE_SCALE, 0, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE,
@@ -59,6 +66,25 @@ public class Level {
         metalCoords = new ArrayList<>();
         infoCoords = new ArrayList<>();
         eagleCoords = new ArrayList<>();
+        tanksLeftCoords = new ArrayList<>();
+        timerChangeStage = new Timer(3000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Utils.LevelLoader("CattleBity\\res\\level2.lvl");
+            }
+        });
+        int x = 16;
+        int y = 16;
+        for (int i = 0; i < 20; i++) {
+            tanksLeftCoords.add(new Point(736 + x, 32 + y));
+            if (i % 2 == 0) {
+                x += 16;
+            } else {
+                x -= 16;
+                y += 16;
+            }
+        }
+        tanksLeft = Utils.resize(atlas.Cut(320, 193, 8, 8), 16, 16);
         for (int i = 0; i < tileMap.length; i++) {
             for (int j = 0; j < tileMap[i].length; j++) {
                 Tile tile = tiles.get(TileType.fromNumeric(tileMap[i][j]));
@@ -122,16 +148,14 @@ public class Level {
         eagleCoords.remove(p);
     }
 
-    public boolean getWinState() {
-        return winState;
-    }
-
-    public void setWinState(boolean winState) {
-        this.winState = winState;
+    public void removeTankFromTanksLeft() {
+        tanksLeftCoords.remove(tanksLeftCoords.size() - 1);
     }
 
     public void changeLevel() {
-
+        tileMap = Utils.LevelLoader("CattleBity\\res\\changeLevel.lvl");
+        tileMap[18][29] = stage++;
+        timerChangeStage.start();
     }
 
     public void setTileMapPlain() {
@@ -151,6 +175,11 @@ public class Level {
                 if (tile.getType() != TileType.GRASS) {
                     tile.render(g, j * SCALED_TILE_SIZE, i * SCALED_TILE_SIZE);
                 }
+            }
+        }
+        if (!gameOver.getGameOver()) {
+            for (Point coords : tanksLeftCoords) {
+                g.drawImage(tanksLeft, coords.x, coords.y, null);
             }
         }
     }

@@ -57,24 +57,14 @@ public class Game implements Runnable {
         Display.addInputListener(input);
         atlas = new TextureAtlas(ATLAS_FILE_NAME);
         menu = new Menu(MENU_FILE_NAME);
-        player = new Player(230, 323, 2, 2, atlas);
-        secondPlayer = new SecondPlayer(130, 323, 2, 2, atlas);
-        level = new Level(atlas);
+        player = new Player(230, 323, 2, 1, atlas);
+        secondPlayer = new SecondPlayer(130, 323, 2, 1, atlas);
+        gameOver = new GameOver(atlas);
+        level = new Level(atlas, gameOver);
         collision = new Collision(level.getTilesCoords(), level);
         enemyStrategy = new EnemyStrategy(atlas, collision, player, secondPlayer, level);
         collision.setEnemyStrategy(enemyStrategy);
-        gameOver = new GameOver(atlas);
-//        enemyStrategy.addEnemyTank(60, 60);
-//        enemyStrategy.addEnemyTank(500, 30);
-//        enemyStrategy.addEnemyTank(180, 35);
-//        enemyStrategy.addEnemyTank(270, 60);
         choiced = false;
-        try {
-            constSound = Applet.newAudioClip(constSoundFile.toURL());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        permanent = true;
 
     }
 
@@ -114,19 +104,11 @@ public class Game implements Runnable {
                     player.update(input, collision, player);
                     enemyStrategy.update();
                     level.update(gameOver);
-//                if (!constSoundIsPlaying && permanent) {
-//                    constSound.loop();
-//                    constSoundIsPlaying = true;
-//                }
                 } else if (menuChoice == 1) {
                     player.update(input, collision, player);
                     secondPlayer.updateSecondPlayer(input, collision, secondPlayer);
                     enemyStrategy.update();
                     level.update(gameOver);
-//                if (!constSoundIsPlaying && permanent) {
-//                    constSound.loop();
-//                    constSoundIsPlaying = true;
-//                }
                 }
             }
         }
@@ -139,7 +121,7 @@ public class Game implements Runnable {
             player.render(graphics);
         }
         else {
-            if (gameOver.getGameOver()) {
+            if (gameOver.getGameOver() || enemyStrategy.getChangeLevel()) {
                 level.render(graphics);
                 gameOver.render(graphics);
             } else {

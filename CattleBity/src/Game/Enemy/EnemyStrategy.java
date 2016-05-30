@@ -31,7 +31,7 @@ public class EnemyStrategy {
     private Timer timer;
     private Timer respaunTimer;
     private int count;
-    private BufferedImage[] beforeAppear;
+    private boolean changeLevel;
 
     public EnemyStrategy(TextureAtlas atlas, Collision collision, Player player, SecondPlayer secondPlayer, Level level) {
         this.atlas = atlas;
@@ -75,6 +75,7 @@ public class EnemyStrategy {
 
     public void destroyEnemyTank(EnemyTank enemyTank) {
         enemyTankList.remove(enemyTank);
+        level.removeTankFromTanksLeft();
     }
 
     public void addEnemyTank() {
@@ -93,12 +94,15 @@ public class EnemyStrategy {
                 enemyTankList.add(new EnemyTank(270, 60, 2, 1, atlas, player));
                 break;
         }
-
     }
 
     public void update() {
         if (enemyTankList.size() < 4 && count < 20) {
             respaunTimer.start();
+        }
+        if (count == 20 && enemyTankList.size() == 0) {
+            level.changeLevel();
+            changeLevel = true;
         }
         for (EnemyTank e : enemyTankList) {
 
@@ -150,6 +154,14 @@ public class EnemyStrategy {
         }
         interval = false;
         timer.start();
+    }
+
+    public boolean getChangeLevel(){
+        return changeLevel;
+    }
+
+    public void setChangeLevel() {
+        changeLevel = true;
     }
 
     public void render(Graphics2D g) {
