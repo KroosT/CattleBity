@@ -24,8 +24,8 @@ public class Collision {
     private EnemyStrategy enemyStrategy;
     private List<Point> metalCoords;
 
-    public Collision(List<Point> coords, Level lvl) {
-        this.coords = coords;
+    public Collision(Level lvl) {
+        this.coords = lvl.getTilesCoords();
         this.enemyStrategy = enemyStrategy;
         this.eagleCoords = lvl.getEagleCoords();
         this.waterCoords = lvl.getWaterCoords();
@@ -37,8 +37,18 @@ public class Collision {
         this.iceCol = false;
     }
 
-    public boolean TankCollision(Player player, float speed, int var) {
+    public void CollisionReload() {
+        this.coords = lvl.getTilesCoords();
+        this.eagleCoords = lvl.getEagleCoords();
+        this.waterCoords = lvl.getWaterCoords();
+        this.iceCoords = lvl.getIceCoords();
+        this.emptyCoords = lvl.getEmptyCoords();
+        this.metalCoords = lvl.getMetalCoords();
+        this.infoCoords = lvl.getInfoCoords();
+        this.iceCol = false;
+    }
 
+    public boolean TankCollision(Player player, float speed, int var) {
         boolean col = false;
         Rectangle playerRect;
         switch (var) {

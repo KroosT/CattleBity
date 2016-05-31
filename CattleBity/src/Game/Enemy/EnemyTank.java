@@ -334,6 +334,10 @@ public class EnemyTank extends Entity {
         }
     }
 
+    public void updatePlayer(Player player) {
+        this.player = player;
+    }
+
     @Override
     public void update(Input input, Collision collision, Player player) {
 

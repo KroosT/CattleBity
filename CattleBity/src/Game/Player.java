@@ -47,6 +47,7 @@ public class Player extends Entity {
     }
 
     private Heading heading;
+    private int lives;
     private Map<Heading, Sprite> spriteMap;
     private float scale;
     private float speed;
@@ -60,15 +61,14 @@ public class Player extends Entity {
     private boolean movePlaying;
     private Timer timer;
     private AudioClip shot;
-    private AudioClip move;
     private boolean destroyed;
-    private File moveFile = new File("CattleBity\\res\\Sounds\\move.wav");
     private File shotFile = new File("CattleBity\\res\\Sounds\\shot.wav");
 
 
     public Player(float x, float y, float scale, float speed, TextureAtlas atlas){
         super(EntityType.Player, x, y);
 
+        this.lives = 3;
         this.atlas = atlas;
         this.scale = scale;
         this.speed = speed;
@@ -89,7 +89,6 @@ public class Player extends Entity {
             }
         });
         try {
-            move = Applet.newAudioClip(moveFile.toURL());
             shot = Applet.newAudioClip(shotFile.toURL());
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -102,7 +101,6 @@ public class Player extends Entity {
         float newY = y;
 
         if (input.getKey(KeyEvent.VK_UP)) {
-
             heading = NORTH;
             if (collision.TankCollision(player, speed, 0) || collision.EnemyTankPlayerTankCollision(player, speed, 0)) {
 
@@ -115,7 +113,6 @@ public class Player extends Entity {
             } else
                 newY += speed;
         } else if (input.getKey(KeyEvent.VK_LEFT)) {
-
             heading = WEST;
             if (collision.TankCollision(player, speed, 2) || collision.EnemyTankPlayerTankCollision(player, speed, 2)) {
 
@@ -299,8 +296,7 @@ public class Player extends Entity {
 
     @Override
     public void render(Graphics2D g) {
-        if (!destroyed)
-            spriteMap.get(heading).render(g, x, y);
+        spriteMap.get(heading).render(g, x, y);
         if (shotOccured) {
             bullet.render(g);
         }
@@ -339,5 +335,18 @@ public class Player extends Entity {
 
     public void destroy() {
         destroyed = true;
+        lives--;
+    }
+
+    public int getLives() {
+        return lives;
+    }
+
+    public boolean isDestroyed() {
+        return destroyed;
+    }
+
+    public void setDestroyed(boolean destroyed) {
+        this.destroyed = destroyed;
     }
 }

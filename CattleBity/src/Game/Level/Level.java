@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+
 import Graphics.TextureAtlas;
 import javax.swing.Timer;
 import utils.Utils;
@@ -20,6 +21,7 @@ public class Level {
     private static final int TILE_IN_GAME_SCALE = 2;
     private static final int SCALED_TILE_SIZE = TILE_IN_GAME_SCALE * TILE_SCALE;
     private Integer[][] tileMap;
+    private Integer[][] tileMapTemp;
     private Map<TileType, Tile> tiles;
     private List<Point> grassCoords;
     private List<Point> tilesCoords;
@@ -31,33 +33,36 @@ public class Level {
     private List<Point> eagleCoords;
     private BufferedImage tanksLeft;
     private List<Point> tanksLeftCoords;
-    private boolean winState;
+    private boolean stageChanging;
     private GameOver gameOver;
-    private int stage;
+    private int currStage;
     private Timer timerChangeStage;
+    private TextureAtlas atlas;
 
     public Level(TextureAtlas atlas, GameOver gameOver) {
         this.gameOver = gameOver;
-        this.stage = 9;
-        winState = false;
-        tiles = new HashMap<>();
-        tiles.put(TileType.BRICK, new Tile(atlas.Cut(32 * TILE_SCALE, 0, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE,
+        this.currStage = 0;
+        this.atlas = atlas;
+        this.tiles = new HashMap<>();
+        this.tiles.put(TileType.BRICK, new Tile(atlas.Cut(32 * TILE_SCALE, 0, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE,
                 TileType.BRICK));
-        tiles.put(TileType.WATER, new Tile(atlas.Cut(32 * TILE_SCALE, 4 * TILE_SCALE, TILE_SCALE, TILE_SCALE),
+        this.tiles.put(TileType.WATER, new Tile(atlas.Cut(32 * TILE_SCALE, 4 * TILE_SCALE, TILE_SCALE, TILE_SCALE),
                 TILE_IN_GAME_SCALE, TileType.WATER));
-        tiles.put(TileType.ICE, new Tile(atlas.Cut(36 * TILE_SCALE, 4 * TILE_SCALE, TILE_SCALE, TILE_SCALE),
+        this.tiles.put(TileType.ICE, new Tile(atlas.Cut(36 * TILE_SCALE, 4 * TILE_SCALE, TILE_SCALE, TILE_SCALE),
                 TILE_IN_GAME_SCALE, TileType.ICE));
-        tiles.put(TileType.GRASS, new Tile(atlas.Cut(34 * TILE_SCALE, 4 * TILE_SCALE, TILE_SCALE, TILE_SCALE),
+        this.tiles.put(TileType.GRASS, new Tile(atlas.Cut(34 * TILE_SCALE, 4 * TILE_SCALE, TILE_SCALE, TILE_SCALE),
                 TILE_IN_GAME_SCALE, TileType.GRASS));
-        tiles.put(TileType.METAL, new Tile(atlas.Cut(32 * TILE_SCALE, 2 * TILE_SCALE, TILE_SCALE, TILE_SCALE),
+        this.tiles.put(TileType.METAL, new Tile(atlas.Cut(32 * TILE_SCALE, 2 * TILE_SCALE, TILE_SCALE, TILE_SCALE),
                 TILE_IN_GAME_SCALE, TileType.METAL));
-        tiles.put(TileType.EAGLE, new Tile(atlas.Cut(304, 4 * TILE_SCALE, EAGLE_SCALE, EAGLE_SCALE), 3, TileType.EAGLE));
-        tiles.put(TileType.EMPTY, new Tile(atlas.Cut(36 * TILE_SCALE, 6 * TILE_SCALE, TILE_SCALE, TILE_SCALE),
+        this.tiles.put(TileType.EAGLE, new Tile(atlas.Cut(304, 4 * TILE_SCALE, EAGLE_SCALE, EAGLE_SCALE), 3, TileType.EAGLE));
+        this.tiles.put(TileType.EMPTY, new Tile(atlas.Cut(36 * TILE_SCALE, 6 * TILE_SCALE, TILE_SCALE, TILE_SCALE),
                 TILE_IN_GAME_SCALE, TileType.EMPTY));
-        tiles.put(TileType.INFO, new Tile(atlas.Cut(368, 214, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE, TileType.INFO));
-        tiles.put(TileType.STAGE, new Tile(atlas.Cut(328, 176, 5 * TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE, TileType.STAGE));
-        tiles.put(TileType.ONE, new Tile(atlas.Cut(336, 184, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE, TileType.ONE));
-        tileMap = Utils.LevelLoader("CattleBity\\res\\level.lvl");
+        this.tiles.put(TileType.INFO, new Tile(atlas.Cut(368, 214, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE, TileType.INFO));
+        this.tiles.put(TileType.STAGE, new Tile(atlas.Cut(328, 176, 5 * TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE, TileType.STAGE));
+        this.tiles.put(TileType.ONE, new Tile(atlas.Cut(336, 184, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE, TileType.ONE));
+        this.tiles.put(TileType.TWO, new Tile(atlas.Cut(344, 184, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE, TileType.TWO));
+        this.tiles.put(TileType.THREE, new Tile(atlas.Cut(352, 184, TILE_SCALE, TILE_SCALE), TILE_IN_GAME_SCALE, TileType.THREE));
+
         grassCoords = new ArrayList<>();
         tilesCoords = new ArrayList<>();
         waterCoords = new ArrayList<>();
@@ -70,11 +75,30 @@ public class Level {
         timerChangeStage = new Timer(3000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Utils.LevelLoader("CattleBity\\res\\level2.lvl");
+                switch (currStage + 1) {
+                    case 1:
+                        tileMap = Utils.LevelLoader("CattleBity\\res\\level.lvl");
+                        break;
+                    case 2:
+                        tileMap = Utils.LevelLoader("CattleBity\\res\\level2.lvl");
+                        break;
+                    case 3:
+                        tileMap = Utils.LevelLoader("CattleBity\\res\\level3.lvl");
+                        break;
+                }
+                loadLevel();
+                stageChanging = false;
+                timerChangeStage.stop();
+                currStage++;
             }
         });
+        changeLevel();
+    }
+
+    private void loadLevel() {
         int x = 16;
         int y = 16;
+        tanksLeftCoords.clear();
         for (int i = 0; i < 20; i++) {
             tanksLeftCoords.add(new Point(736 + x, 32 + y));
             if (i % 2 == 0) {
@@ -85,9 +109,17 @@ public class Level {
             }
         }
         tanksLeft = Utils.resize(atlas.Cut(320, 193, 8, 8), 16, 16);
+        eagleCoords.clear();
+        grassCoords.clear();
+        waterCoords.clear();
+        iceCoords.clear();
+        emptyCoords.clear();
+        metalCoords.clear();
+        infoCoords.clear();
+        tilesCoords.clear();
         for (int i = 0; i < tileMap.length; i++) {
             for (int j = 0; j < tileMap[i].length; j++) {
-                Tile tile = tiles.get(TileType.fromNumeric(tileMap[i][j]));
+                Tile tile = this.tiles.get(TileType.fromNumeric(tileMap[i][j]));
                 if (tile.getType() == TileType.EAGLE)
                     eagleCoords.add(new Point(j * SCALED_TILE_SIZE, i * SCALED_TILE_SIZE));
                 else if (tile.getType() == TileType.GRASS)
@@ -153,9 +185,26 @@ public class Level {
     }
 
     public void changeLevel() {
-        tileMap = Utils.LevelLoader("CattleBity\\res\\changeLevel.lvl");
-        tileMap[18][29] = stage++;
-        timerChangeStage.start();
+        if (currStage + 1 == 4) {
+            gameOver.setWin(true);
+        } else {
+            tileMapTemp = Utils.LevelLoader("CattleBity\\res\\changeLevel.lvl");
+            switch (currStage + 1) {
+                case 1:
+                    tileMapTemp[18][27] = 9;
+                    break;
+                case 2:
+                    tileMapTemp[18][27] = 10;
+                    break;
+                case 3:
+                    tileMapTemp[18][27] = 11;
+                    break;
+            }
+            tileMap = tileMapTemp;
+            loadLevel();
+            stageChanging = true;
+            timerChangeStage.start();
+        }
     }
 
     public void setTileMapPlain() {
@@ -163,7 +212,7 @@ public class Level {
     }
 
     public void update(GameOver gameOver) {
-        if (eagleCoords.size() == 0) {
+        if (eagleCoords.size() == 0 && !stageChanging) {
             gameOver.setGameOver(true);
         }
     }
@@ -177,7 +226,7 @@ public class Level {
                 }
             }
         }
-        if (!gameOver.getGameOver()) {
+        if (!gameOver.getGameOver() && !stageChanging) {
             for (Point coords : tanksLeftCoords) {
                 g.drawImage(tanksLeft, coords.x, coords.y, null);
             }
@@ -188,5 +237,9 @@ public class Level {
         for (Point p : grassCoords) {
             tiles.get(TileType.GRASS).render(g, p.x, p.y);
         }
+    }
+
+    public boolean getStageChanging() {
+        return stageChanging;
     }
 }

@@ -23,15 +23,14 @@ public class EnemyStrategy {
     private List<EnemyTank> enemyTankList;
     private TextureAtlas atlas;
     private Collision collision;
-    private boolean firstTime;
     private Player player;
     private SecondPlayer secondPlayer;
     private Level level;
     private boolean interval;
     private Timer timer;
     private Timer respaunTimer;
+    private Timer changeLevelTimer;
     private int count;
-    private boolean changeLevel;
 
     public EnemyStrategy(TextureAtlas atlas, Collision collision, Player player, SecondPlayer secondPlayer, Level level) {
         this.atlas = atlas;
@@ -40,7 +39,6 @@ public class EnemyStrategy {
         this.secondPlayer = secondPlayer;
         this.level = level;
         enemyTankList = new ArrayList<>();
-        firstTime = true;
         interval = true;
         timer = new Timer(5000, new ActionListener() {
             @Override
@@ -49,13 +47,20 @@ public class EnemyStrategy {
                 timer.stop();
             }
         });
-
         respaunTimer = new Timer(3000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 addEnemyTank();
                 count++;
                 respaunTimer.stop();
+            }
+        });
+        changeLevelTimer = new Timer(3000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                level.changeLevel();
+                reloadEnemyStrategy();
+                changeLevelTimer.stop();
             }
         });
         //beforeAppear[0] = Utils.resize(atlas.Cut(258, 100, 9, 9), 18, 18);
@@ -66,7 +71,7 @@ public class EnemyStrategy {
         enemyTankList.add(new EnemyTank(500, 30, 2, 1, atlas, player));
         enemyTankList.add(new EnemyTank(180, 35, 2, 1, atlas, player));
         enemyTankList.add(new EnemyTank(270, 60, 2, 1, atlas, player));
-        count = 4;
+        count = 20;
     }
 
     public List<EnemyTank> getEnemyTankList() {
@@ -97,12 +102,13 @@ public class EnemyStrategy {
     }
 
     public void update() {
+        if (level.getStageChanging())
+            return;
         if (enemyTankList.size() < 4 && count < 20) {
             respaunTimer.start();
         }
         if (count == 20 && enemyTankList.size() == 0) {
-            level.changeLevel();
-            changeLevel = true;
+            changeLevelTimer.start();
         }
         for (EnemyTank e : enemyTankList) {
 
@@ -143,7 +149,6 @@ public class EnemyStrategy {
                     }
                     else {
                         e.setX(e.getX() + e.getSpeed());
-
                     }
                     break;
             }
@@ -156,12 +161,20 @@ public class EnemyStrategy {
         timer.start();
     }
 
-    public boolean getChangeLevel(){
-        return changeLevel;
+    public void updatePlayer(Player player) {
+        this.player = player;
+        for (EnemyTank e : enemyTankList) {
+            e.updatePlayer(player);
+        }
     }
 
-    public void setChangeLevel() {
-        changeLevel = true;
+    public void reloadEnemyStrategy() {
+        enemyTankList.clear();
+        enemyTankList.add(new EnemyTank(60, 60, 2, 1, atlas, player));
+        enemyTankList.add(new EnemyTank(500, 30, 2, 1, atlas, player));
+        enemyTankList.add(new EnemyTank(180, 35, 2, 1, atlas, player));
+        enemyTankList.add(new EnemyTank(270, 60, 2, 1, atlas, player));
+        count = 20;
     }
 
     public void render(Graphics2D g) {

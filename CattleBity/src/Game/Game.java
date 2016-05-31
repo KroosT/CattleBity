@@ -8,9 +8,12 @@ import IO.Input;
 import utils.Time;
 import Graphics.TextureAtlas;
 
+import javax.swing.*;
 import java.applet.Applet;
 import java.applet.AudioClip;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.MalformedURLException;
 
@@ -42,11 +45,7 @@ public class Game implements Runnable {
     private static int menuChoice;
     private static boolean choiced;
     private EnemyStrategy enemyStrategy;
-    private AudioClip constSound;
-    private static boolean constSoundIsPlaying;
-    private static boolean permanent;
-    private File constSoundFile = new File("CattleBity\\res\\Sounds\\const.wav");
-
+    private Timer respawnPlayerTimer;
 
     public Game() {
 
@@ -61,10 +60,20 @@ public class Game implements Runnable {
         secondPlayer = new SecondPlayer(130, 323, 2, 1, atlas);
         gameOver = new GameOver(atlas);
         level = new Level(atlas, gameOver);
-        collision = new Collision(level.getTilesCoords(), level);
+        collision = new Collision(level);
         enemyStrategy = new EnemyStrategy(atlas, collision, player, secondPlayer, level);
         collision.setEnemyStrategy(enemyStrategy);
         choiced = false;
+        respawnPlayerTimer = new Timer(4000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                player = new Player(415, 540, 2, 1, atlas);
+                player.setHeading(0);
+                enemyStrategy.updatePlayer(player);
+                player.setDestroyed(false);
+                respawnPlayerTimer.stop();
+            }
+        });
 
     }
 
@@ -97,18 +106,31 @@ public class Game implements Runnable {
             menu.update(input, collision, player);
         }
         else {
-            if (gameOver.getGameOver()) {
-                level.setTileMapPlain();
+            if (level.getStageChanging()) {
+                player = new Player(415, 540, 2, 1, atlas);
+                player.setHeading(0);
+                enemyStrategy.updatePlayer(player);
+                collision.CollisionReload();
             } else {
-                if (menuChoice == 0) {
-                    player.update(input, collision, player);
-                    enemyStrategy.update();
-                    level.update(gameOver);
-                } else if (menuChoice == 1) {
-                    player.update(input, collision, player);
-                    secondPlayer.updateSecondPlayer(input, collision, secondPlayer);
-                    enemyStrategy.update();
-                    level.update(gameOver);
+                if (gameOver.getGameOver() || gameOver.getWinState()) {
+                    level.setTileMapPlain();
+                } else {
+                    if (menuChoice == 0) {
+                        if (player.isDestroyed() && player.getLives() > 0) {
+                            respawnPlayerTimer.start();
+                        } else if (player.isDestroyed() && player.getLives() <= 0){
+                            gameOver.setGameOver(true);
+                        } else {
+                            player.update(input, collision, player);
+                            enemyStrategy.update();
+                            level.update(gameOver);
+                        }
+                    } else if (menuChoice == 1) {
+                        player.update(input, collision, player);
+                        secondPlayer.updateSecondPlayer(input, collision, secondPlayer);
+                        enemyStrategy.update();
+                        level.update(gameOver);
+                    }
                 }
             }
         }
@@ -121,21 +143,25 @@ public class Game implements Runnable {
             player.render(graphics);
         }
         else {
-            if (gameOver.getGameOver() || enemyStrategy.getChangeLevel()) {
+            if (level.getStageChanging()) {
                 level.render(graphics);
-                gameOver.render(graphics);
             } else {
-                if (menuChoice == 0) {
+                if (gameOver.getGameOver() || gameOver.getWinState()) {
                     level.render(graphics);
-                    player.render(graphics);
-                    enemyStrategy.render(graphics);
-                    level.renderGrass(graphics);
-                } else if (menuChoice == 1) {
-                    level.render(graphics);
-                    player.render(graphics);
-                    secondPlayer.render(graphics);
-                    enemyStrategy.render(graphics);
-                    level.renderGrass(graphics);
+                    gameOver.render(graphics);
+                } else {
+                    if (menuChoice == 0) {
+                        level.render(graphics);
+                        player.render(graphics);
+                        enemyStrategy.render(graphics);
+                        level.renderGrass(graphics);
+                    } else if (menuChoice == 1) {
+                        level.render(graphics);
+                        player.render(graphics);
+                        secondPlayer.render(graphics);
+                        enemyStrategy.render(graphics);
+                        level.renderGrass(graphics);
+                    }
                 }
             }
         }
@@ -206,12 +232,4 @@ public class Game implements Runnable {
         menuChoice = choice;
     }
 
-    public static void setConstSoundIsPlaying(boolean state) {
-        constSoundIsPlaying = state;
-        permanent = state;
-    }
-
-    public static void setPermanent(boolean state) {
-        permanent = state;
-    }
 }
