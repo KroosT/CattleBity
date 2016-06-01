@@ -1,5 +1,6 @@
 package Game;
 
+import Game.Menu.Pause;
 import IO.Input;
 
 import java.applet.Applet;
@@ -61,11 +62,15 @@ public class Player extends Entity {
     private boolean movePlaying;
     private Timer timer;
     private AudioClip shot;
+    private AudioClip littleBoom;
+    private AudioClip bigBoom;
     private boolean destroyed;
+    private File littleBoomFile = new File("CattleBity\\res\\Sounds\\littleBoom.wav");
+    private File bigBoomFile = new File("CattleBity\\res\\Sounds\\BigBoom.wav");
     private File shotFile = new File("CattleBity\\res\\Sounds\\shot.wav");
 
 
-    public Player(float x, float y, float scale, float speed, TextureAtlas atlas){
+    public Player(float x, float y, float scale, float speed, TextureAtlas atlas, Pause pause){
         super(EntityType.Player, x, y);
 
         this.lives = 3;
@@ -90,6 +95,8 @@ public class Player extends Entity {
         });
         try {
             shot = Applet.newAudioClip(shotFile.toURL());
+            littleBoom = Applet.newAudioClip(littleBoomFile.toURL());
+            bigBoom = Applet.newAudioClip(bigBoomFile.toURL());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -99,6 +106,7 @@ public class Player extends Entity {
     public void update(Input input, Collision collision, Player player){
         float newX = x;
         float newY = y;
+
 
         if (input.getKey(KeyEvent.VK_UP)) {
             heading = NORTH;
@@ -126,7 +134,7 @@ public class Player extends Entity {
                 newX += speed;
         }
 
-        if (input.getKey(KeyEvent.VK_SLASH)) {
+        if (input.getKey(KeyEvent.VK_SPACE)) {
 
             if (bullet == null && interval) {
                 switch (heading) {
@@ -143,6 +151,7 @@ public class Player extends Entity {
                         bullet = new Bullet(x + 12, y + SPRITE_SCALE + 10, 2, 3, atlas);
                         break;
                 }
+                shot.stop();
                 shot.play();
                 shotOccured = true;
             }
@@ -161,21 +170,13 @@ public class Player extends Entity {
 
         if (shotOccured) {
             if (bullet.getHeading() == 0) {
-                if (bullet.y - speed < 0) {
-                    boom = new Boom(bullet.x, bullet.y, atlas);
-                    boom.setDelay(100);
-                    boomState = true;
-                    boomKind = 0;
-                    bullet = null;
-                    shotOccured = false;
-                    interval = false;
-                    timer.start();
-                } else bullet.y -= 2 * speed;
                 if (collision.BulletCollision(bullet, 3.2f * speed, 0)) {
                     boom = new Boom(bullet.x, bullet.y, atlas);
                     boom.setDelay(100);
                     boomState = true;
                     boomKind = 0;
+                    littleBoom.stop();
+                    littleBoom.play();
                     bullet = null;
                     shotOccured = false;
                     interval = false;
@@ -185,26 +186,21 @@ public class Player extends Entity {
                     boom.setDelay(100);
                     boomState = true;
                     boomKind = 6;
+                    bigBoom.stop();
+                    bigBoom.play();
                     bullet = null;
                     shotOccured = false;
                     interval = false;
                     timer.start();
-                }
+                } else
+                    bullet.y -= 2 * speed;
             } else if (bullet.getHeading() == 1) {
-                if (bullet.x + speed > Game.WIDTH) {
-                    boom = new Boom(bullet.x, bullet.y, atlas);
-                    boom.setDelay(100);
-                    boomState = true;
-                    boomKind = 0;
-                    bullet = null;
-                    shotOccured = false;
-                    interval = false;
-                    timer.start();
-                } else bullet.x += 2 * speed;
                 if (collision.BulletCollision(bullet, speed, 3)) {
                     boom = new Boom(bullet.x, bullet.y + 10, atlas);
                     boom.setDelay(100);
                     boomState = true;
+                    littleBoom.stop();
+                    littleBoom.play();
                     boomKind = 0;
                     bullet = null;
                     shotOccured = false;
@@ -215,26 +211,20 @@ public class Player extends Entity {
                     boom.setDelay(100);
                     boomState = true;
                     boomKind = 6;
+                    bigBoom.stop();
+                    bigBoom.play();
                     bullet = null;
                     shotOccured = false;
                     interval = false;
                     timer.start();
-                }
+                } else bullet.x += 2 * speed;
             } else if (bullet.getHeading() == 2) {
-                if (bullet.x - speed < 0) {
-                    boom = new Boom(bullet.x, bullet.y, atlas);
-                    boom.setDelay(100);
-                    boomState = true;
-                    boomKind = 0;
-                    bullet = null;
-                    shotOccured = false;
-                    interval = false;
-                    timer.start();
-                } else bullet.x -= 2 * speed;
                 if (collision.BulletCollision(bullet, 3.2f * speed, 2)) {
                     boom = new Boom(bullet.x - 10, bullet.y + 10, atlas);
                     boom.setDelay(100);
                     boomState = true;
+                    littleBoom.stop();
+                    littleBoom.play();
                     boomKind = 0;
                     bullet = null;
                     shotOccured = false;
@@ -245,27 +235,21 @@ public class Player extends Entity {
                     boom.setDelay(100);
                     boomState = true;
                     boomKind = 6;
+                    bigBoom.stop();
+                    bigBoom.play();
                     bullet = null;
                     shotOccured = false;
                     interval = false;
                     timer.start();
-                }
+                } else bullet.x -= 2 * speed;
             } else if (bullet.getHeading() == 3) {
-                if (bullet.y - speed > Game.HEIGHT) {
-                    boom = new Boom(bullet.x, bullet.y, atlas);
-                    boom.setDelay(100);
-                    boomState = true;
-                    boomKind = 0;
-                    bullet = null;
-                    shotOccured = false;
-                    interval = false;
-                    timer.start();
-                } else bullet.y += 2 * speed;
                 if (collision.BulletCollision(bullet, speed, 1)) {
                     boom = new Boom(bullet.x, bullet.y + 25, atlas);
                     boom.setDelay(100);
                     boomState = true;
                     boomKind = 0;
+                    littleBoom.stop();
+                    littleBoom.play();
                     bullet = null;
                     shotOccured = false;
                     interval = false;
@@ -275,11 +259,13 @@ public class Player extends Entity {
                     boom.setDelay(100);
                     boomState = true;
                     boomKind = 6;
+                    bigBoom.stop();
+                    bigBoom.play();
                     bullet = null;
                     shotOccured = false;
                     interval = false;
                     timer.start();
-                }
+                } else bullet.y += 2 * speed;
             }
         }
 
@@ -340,6 +326,10 @@ public class Player extends Entity {
 
     public int getLives() {
         return lives;
+    }
+
+    public void setLives(int lives) {
+        this.lives = lives;
     }
 
     public boolean isDestroyed() {

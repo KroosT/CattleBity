@@ -293,16 +293,16 @@ public class Collision {
         Rectangle playerRect;
         switch (direction) {
             case 0:
-                playerRect = new Rectangle((int)player.x, (int)(player.y - 12 * speed), 30, 30);
+                playerRect = new Rectangle((int)player.x, (int)(player.y - 6 * speed), 30, 30);
                 break;
             case 1:
-                playerRect = new Rectangle((int)player.x, (int)(player.y + 2 * speed), 30, 30);
+                playerRect = new Rectangle((int)player.x, (int)(player.y + speed), 30, 30);
                 break;
             case 2:
-                playerRect = new Rectangle((int)(player.x - 12 * speed), (int)player.y, 30, 30);
+                playerRect = new Rectangle((int)(player.x - 6 * speed), (int)player.y, 30, 30);
                 break;
             case 3:
-                playerRect = new Rectangle((int)(player.x + 2 * speed), (int)player.y, 30, 30);
+                playerRect = new Rectangle((int)(player.x + speed), (int)player.y, 30, 30);
                 break;
             default:
                 playerRect = new Rectangle((int)player.x, (int)player.y, 30, 30);
@@ -313,16 +313,16 @@ public class Collision {
             Rectangle tRect;
             switch (t.getDirection()){
                 case 0:
-                    tRect = new Rectangle((int)t.x, (int)(t.y - 12 * speed), 30, 30);
+                    tRect = new Rectangle((int)t.x, (int)(t.y - 6 * speed), 30, 30);
                     break;
                 case 1:
-                    tRect = new Rectangle((int)t.x, (int)(t.y + 2 * speed), 30, 30);
+                    tRect = new Rectangle((int)t.x, (int)(t.y + speed), 30, 30);
                     break;
                 case 2:
-                    tRect = new Rectangle((int)(t.x - 12 * speed), (int)t.y, 30, 30);
+                    tRect = new Rectangle((int)(t.x - 6 * speed), (int)t.y, 30, 30);
                     break;
                 case 3:
-                    tRect = new Rectangle((int)(t.x + 2 * speed), (int)t.y, 30, 30);
+                    tRect = new Rectangle((int)(t.x + speed), (int)t.y, 30, 30);
                     break;
                 default:
                     tRect = new Rectangle((int)t.x, (int)t.y, 30, 30);

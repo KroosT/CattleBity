@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
+import Game.Player;
 import Graphics.TextureAtlas;
+
 import javax.swing.Timer;
 import utils.Utils;
 import Game.GameOver;
@@ -32,12 +34,15 @@ public class Level {
     private List<Point> infoCoords;
     private List<Point> eagleCoords;
     private BufferedImage tanksLeft;
+    private BufferedImage playerLives;
     private List<Point> tanksLeftCoords;
     private boolean stageChanging;
     private GameOver gameOver;
     private int currStage;
     private Timer timerChangeStage;
     private TextureAtlas atlas;
+    private Player player;
+    private BufferedImage one, two, three;
 
     public Level(TextureAtlas atlas, GameOver gameOver) {
         this.gameOver = gameOver;
@@ -72,12 +77,15 @@ public class Level {
         infoCoords = new ArrayList<>();
         eagleCoords = new ArrayList<>();
         tanksLeftCoords = new ArrayList<>();
+        one = Utils.resize(atlas.Cut(337, 184, 8, 8), 16, 16);
+        two = Utils.resize(atlas.Cut(345, 184, 8, 8), 16, 16);
+        three = Utils.resize(atlas.Cut(353, 184, 8, 8), 16, 16);
         timerChangeStage = new Timer(3000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 switch (currStage + 1) {
                     case 1:
-                        tileMap = Utils.LevelLoader("CattleBity\\res\\level.lvl");
+                        tileMap = Utils.LevelLoader("CattleBity\\res\\level1.lvl");
                         break;
                     case 2:
                         tileMap = Utils.LevelLoader("CattleBity\\res\\level2.lvl");
@@ -109,6 +117,7 @@ public class Level {
             }
         }
         tanksLeft = Utils.resize(atlas.Cut(320, 193, 8, 8), 16, 16);
+        playerLives = Utils.resize(atlas.Cut(376, 134, 19, 19), 38, 38);
         eagleCoords.clear();
         grassCoords.clear();
         waterCoords.clear();
@@ -185,6 +194,9 @@ public class Level {
     }
 
     public void changeLevel() {
+        if (currStage != 0) {
+            player.setLives(3);
+        }
         if (currStage + 1 == 4) {
             gameOver.setWin(true);
         } else {
@@ -205,6 +217,10 @@ public class Level {
             stageChanging = true;
             timerChangeStage.start();
         }
+    }
+
+    public void updatePlayer(Player player) {
+        this.player = player;
     }
 
     public void setTileMapPlain() {
@@ -229,6 +245,14 @@ public class Level {
         if (!gameOver.getGameOver() && !stageChanging) {
             for (Point coords : tanksLeftCoords) {
                 g.drawImage(tanksLeft, coords.x, coords.y, null);
+            }
+            g.drawImage(playerLives, 750, 400, null);
+            if (player.getLives() == 3) {
+                g.drawImage(three, 766, 420, null);
+            } else if (player.getLives() == 2) {
+                g.drawImage(two, 766, 420, null);
+            } else if (player.getLives() == 1) {
+                g.drawImage(one, 766, 420, null);
             }
         }
     }

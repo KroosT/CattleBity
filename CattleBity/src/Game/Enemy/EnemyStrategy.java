@@ -30,6 +30,7 @@ public class EnemyStrategy {
     private Timer timer;
     private Timer respaunTimer;
     private Timer changeLevelTimer;
+    private Timer firstRespawnTimer;
     private int count;
 
     public EnemyStrategy(TextureAtlas atlas, Collision collision, Player player, SecondPlayer secondPlayer, Level level) {
@@ -63,10 +64,12 @@ public class EnemyStrategy {
                 changeLevelTimer.stop();
             }
         });
-        //beforeAppear[0] = Utils.resize(atlas.Cut(258, 100, 9, 9), 18, 18);
-        //beforeAppear[1] = Utils.resize(atlas.Cut(273, 98, 12, 12), 24, 24);
-        //beforeAppear[2] = Utils.resize(atlas.Cut(289, 97, 13, 13), 26, 26);
-        //beforeAppear[3] = Utils.resize(atlas.Cut(304, 96, 15, 15), 30, 30);
+        firstRespawnTimer = new Timer(3000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                firstRespawnTimer.stop();
+            }
+        });
         enemyTankList.add(new EnemyTank(60, 60, 2, 1, atlas, player));
         enemyTankList.add(new EnemyTank(500, 30, 2, 1, atlas, player));
         enemyTankList.add(new EnemyTank(180, 35, 2, 1, atlas, player));
@@ -115,11 +118,12 @@ public class EnemyStrategy {
             int direction = e.getDirection();
             switch (direction) {
                 case 0:
-                    if (collision.EnemyTankCollision(e, e.getSpeed(), direction) ||
-                            collision.EnemyTankPlayerTankCollision(player, e.getSpeed(), direction)) {
+                    if (collision.EnemyTankCollision(e, e.getSpeed(), direction)) {
                         e.changeDirection();
                     }
-                    else {
+                    else if (collision.EnemyTankPlayerTankCollision(player, e.getSpeed(), direction)) {
+
+                    } else {
                         e.setY(e.getY() - e.getSpeed());
                     }
                     break;
@@ -128,26 +132,29 @@ public class EnemyStrategy {
                             collision.EnemyTankPlayerTankCollision(player, e.getSpeed(), direction)) {
                         e.changeDirection();
                     }
-                    else {
+                    else if (collision.EnemyTankPlayerTankCollision(player, e.getSpeed(), direction)) {
+
+                    } else {
                         e.setY(e.getY() + e.getSpeed());
                     }
                     break;
                 case 2:
-                    if (collision.EnemyTankCollision(e, e.getSpeed(), direction) ||
-                            collision.EnemyTankPlayerTankCollision(player, e.getSpeed(), direction)) {
+                    if (collision.EnemyTankCollision(e, e.getSpeed(), direction)) {
                         e.changeDirection();
                     }
-                    else {
+                    else if (collision.EnemyTankPlayerTankCollision(player, e.getSpeed(), direction)) {
+
+                    } else {
                         e.setX(e.getX() - e.getSpeed());
                     }
                     break;
                 case 3:
-                    if (collision.EnemyTankCollision(e, e.getSpeed(), direction) ||
-                            collision.EnemyTankPlayerTankCollision(player, e.getSpeed(), direction) ||
-                            collision.EnemyTankSecondPlayerTankCollision(secondPlayer, e.getSpeed(), direction)) {
+                    if (collision.EnemyTankCollision(e, e.getSpeed(), direction)) {
                         e.changeDirection();
                     }
-                    else {
+                    else if (collision.EnemyTankPlayerTankCollision(player, e.getSpeed(), direction)) {
+
+                    } else {
                         e.setX(e.getX() + e.getSpeed());
                     }
                     break;
@@ -166,6 +173,7 @@ public class EnemyStrategy {
         for (EnemyTank e : enemyTankList) {
             e.updatePlayer(player);
         }
+        level.updatePlayer(player);
     }
 
     public void reloadEnemyStrategy() {

@@ -1,5 +1,6 @@
 package Game.Menu;
 
+import Display.Display;
 import Game.*;
 import IO.Input;
 import utils.ResourceLoader;
@@ -58,14 +59,7 @@ public class Menu extends Entity {
                 player.setY(540);
                 player.setHeading(0);
             } else if (position == DOWN) {
-                Game.setChoiced(true);
-                Game.setMenuChoice(1);
-                player.setX(415);
-                player.setY(510);
-                player.setHeading(0);
-                secondPlayer.setX(306);
-                secondPlayer.setY(510);
-                secondPlayer.setHeading(0);
+                Display.destroyWindow();
             }
         }
     }

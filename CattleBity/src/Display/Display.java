@@ -78,6 +78,7 @@ public class Display {
             return;
 
         window.dispose();
+        System.exit(0);
 
     }
 

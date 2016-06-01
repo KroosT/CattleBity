@@ -4,10 +4,14 @@ import Game.*;
 import IO.Input;
 import Graphics.TextureAtlas;
 
+import java.applet.Applet;
+import java.applet.AudioClip;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.*;
 import java.util.List;
 
@@ -64,6 +68,8 @@ public class EnemyTank extends Entity {
     private boolean interval;
     private Timer timer;
     private boolean shotOccured;
+    private File boomFile = new File("CattleBity\\res\\Sounds\\BigBoom.wav");
+    private AudioClip boomSound;
 
     public EnemyTank(float x, float y, float scale, float speed, TextureAtlas atlas, Player player){
         super(EntityType.EnemyTank, x, y);
@@ -87,6 +93,11 @@ public class EnemyTank extends Entity {
                 timer.stop();
             }
         });
+        try {
+            boomSound = Applet.newAudioClip(boomFile.toURL());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void shot(Collision collision) {
@@ -104,16 +115,6 @@ public class EnemyTank extends Entity {
         }
         if (shotOccured) {
             if (bullet.getHeading() == 0) {
-                if (bullet.getY() - speed < 0) {
-                    boom = new Boom(bullet.getX(), bullet.getY(), atlas);
-                    boom.setDelay(100);
-                    boomState = true;
-                    boomKind = 0;
-                    bullet = null;
-                    interval = false;
-                    timer.start();
-                    shotOccured = false;
-                } else bullet.setY(bullet.getY() - 2 * speed);
                 if (collision.BulletCollision(bullet, 3.2f * speed, 0)) {
                     boom = new Boom(bullet.getX(), bullet.getY(), atlas);
                     boom.setDelay(100);
@@ -129,22 +130,14 @@ public class EnemyTank extends Entity {
                     boom.setDelay(100);
                     boomState = true;
                     boomKind = 6;
+                    boomSound.stop();
+                    boomSound.play();
                     bullet = null;
                     shotOccured = false;
                     interval = false;
                     timer.start();
-                }
+                } else bullet.setY(bullet.getY() - 2 * speed);
             } else if (bullet.getHeading() == 1) {
-                if (bullet.getX() + speed > Game.WIDTH) {
-                    boom = new Boom(bullet.getX(), bullet.getY(), atlas);
-                    boom.setDelay(100);
-                    boomState = true;
-                    boomKind = 0;
-                    bullet = null;
-                    interval = false;
-                    timer.start();
-                    shotOccured = false;
-                } else bullet.setX(bullet.getX() + 2 * speed);
                 if (collision.BulletCollision(bullet, speed, 3)) {
                     boom = new Boom(bullet.getX(), bullet.getY() + 10, atlas);
                     boom.setDelay(100);
@@ -160,22 +153,14 @@ public class EnemyTank extends Entity {
                     boom.setDelay(100);
                     boomState = true;
                     boomKind = 6;
+                    boomSound.stop();
+                    boomSound.play();
                     bullet = null;
                     shotOccured = false;
                     interval = false;
                     timer.start();
-                }
+                } else bullet.setX(bullet.getX() + 2 * speed);
             } else if (bullet.getHeading() == 2) {
-                if (bullet.getX() - speed < 0) {
-                    boom = new Boom(bullet.getX(), bullet.getY(), atlas);
-                    boom.setDelay(100);
-                    boomState = true;
-                    boomKind = 0;
-                    bullet = null;
-                    interval = false;
-                    timer.start();
-                    shotOccured = false;
-                } else bullet.setX(bullet.getX() - 2 * speed);
                 if (collision.BulletCollision(bullet, 3.2f * speed, 2)) {
                     boom = new Boom(bullet.getX() - 10, bullet.getY() + 10, atlas);
                     boom.setDelay(100);
@@ -191,22 +176,14 @@ public class EnemyTank extends Entity {
                     boom.setDelay(100);
                     boomState = true;
                     boomKind = 6;
+                    boomSound.stop();
+                    boomSound.play();
                     bullet = null;
                     shotOccured = false;
                     interval = false;
                     timer.start();
-                }
+                } else bullet.setX(bullet.getX() - 2 * speed);
             } else if (bullet.getHeading() == 3) {
-                if (bullet.getY() - speed > Game.HEIGHT) {
-                    boom = new Boom(bullet.getX(), bullet.getY(), atlas);
-                    boom.setDelay(100);
-                    boomState = true;
-                    boomKind = 0;
-                    bullet = null;
-                    interval = false;
-                    timer.start();
-                    shotOccured = false;
-                } else bullet.setY(bullet.getY() + 2 * speed);
                 if (collision.BulletCollision(bullet, speed, 1)) {
                     boom = new Boom(bullet.getX(), bullet.getY() + 25, atlas);
                     boom.setDelay(100);
@@ -222,11 +199,13 @@ public class EnemyTank extends Entity {
                     boom.setDelay(100);
                     boomState = true;
                     boomKind = 6;
+                    boomSound.stop();
+                    boomSound.play();
                     bullet = null;
                     shotOccured = false;
                     interval = false;
                     timer.start();
-                }
+                } else bullet.setY(bullet.getY() + 2 * speed);
             }
         }
 
