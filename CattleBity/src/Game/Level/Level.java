@@ -85,7 +85,7 @@ public class Level {
             public void actionPerformed(ActionEvent e) {
                 switch (currStage + 1) {
                     case 1:
-                        tileMap = Utils.LevelLoader("CattleBity\\res\\level1.lvl");
+                        tileMap = Utils.LevelLoader("CattleBity\\res\\level.lvl");
                         break;
                     case 2:
                         tileMap = Utils.LevelLoader("CattleBity\\res\\level2.lvl");

@@ -42,6 +42,7 @@ public class Menu extends Entity {
                 return;
             else {
                 player.setY(player.getY() - 40);
+                player.setX(player.getX() - 80);
                 position = UP;
             }
         } else if (input.getKey(KeyEvent.VK_DOWN)) {
@@ -49,6 +50,7 @@ public class Menu extends Entity {
                 return;
             else {
                 player.setY(player.getY() + 40);
+                player.setX(player.getX() + 80);
                 position = DOWN;
             }
         } else if (input.getKey(KeyEvent.VK_ENTER)) {
